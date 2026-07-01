@@ -173,6 +173,68 @@ function Uptime() {
   return <>{uptime}</>;
 }
 
+// ======== RAIN BACKDROP ========
+
+function RainBackdrop({ theme }: { theme: ThemeMode }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+    const WIND = 0.35;
+
+    interface Drop { x: number; y: number; length: number; speed: number; opacity: number; }
+    const drops: Drop[] = [];
+    const count = Math.min(90, Math.floor(width / 14));
+    for (let i = 0; i < count; i++) {
+      drops.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        length: 8 + Math.random() * 18,
+        speed: 3 + Math.random() * 5,
+        opacity: 0.06 + Math.random() * 0.14,
+      });
+    }
+
+    let raf: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
+      const base = theme === "dark" ? "250,250,250" : "10,10,10";
+      drops.forEach((d) => {
+        ctx.strokeStyle = `rgba(${base},${d.opacity})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(d.x, d.y);
+        ctx.lineTo(d.x + WIND * d.length, d.y + d.length);
+        ctx.stroke();
+        d.y += d.speed;
+        d.x += WIND * d.speed;
+        if (d.y > height) { d.y = -d.length; d.x = Math.random() * width; }
+        if (d.x > width) d.x = 0;
+      });
+      raf = requestAnimationFrame(animate);
+    };
+    animate();
+
+    const handleResize = () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [theme]);
+
+  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
+}
+
 // ======== APP ========
 
 export default function App() {
@@ -184,7 +246,8 @@ export default function App() {
   const [copied, setCopied] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [chiming, setChiming] = useState(false);
-  const [showBanner, setShowBanner] = useState(() => !sessionStorage.getItem("banner-dismissed"));
+  const [showBanner, setShowBanner] = useState(() => !sessionStorage.getItem("banner-dismissed-v2"));
+  const [bannerIndex, setBannerIndex] = useState(0);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const email = "cotovo@qq.com";
@@ -198,6 +261,17 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current); }, []);
+
+  const banners = [
+    { text: "新域名 ", link: { label: "coox.one", url: "https://coox.one" }, suffix: " 已上线" },
+    { text: "迁移至 Cloudflare，不稳定敬请谅解，稳定访问 ", link: { label: "cot.wiki", url: "https://cot.wiki" }, suffix: "" },
+  ];
+
+  useEffect(() => {
+    if (!showBanner) return;
+    const id = setInterval(() => setBannerIndex((i) => (i + 1) % banners.length), 1500);
+    return () => clearInterval(id);
+  }, [showBanner]);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(email).then(() => {
@@ -215,7 +289,7 @@ export default function App() {
   }, []);
 
   const dismissBanner = useCallback(() => {
-    sessionStorage.setItem("banner-dismissed", "1");
+    sessionStorage.setItem("banner-dismissed-v2", "1");
     setShowBanner(false);
   }, []);
 
@@ -226,6 +300,9 @@ export default function App() {
         className="relative min-h-screen w-full overflow-x-hidden font-sans flex items-center justify-center"
         style={{ background: t.bg, color: t.fg }}
       >
+        {/* Rain Backdrop */}
+        <RainBackdrop theme={theme} />
+
         {/* Welcome Banner */}
         <AnimatePresence>
           {showBanner && (
@@ -242,23 +319,33 @@ export default function App() {
                 borderBottom: `1px solid ${t.divider}`,
               }}
             >
-              <div className="flex items-center gap-3 py-2.5 px-5 sm:px-6 w-full max-w-md">
-                <p className="flex-1 text-center text-[11px] tracking-wide" style={{ color: t.fgSecondary }}>
-                  欢迎来到{" "}
-                  <a
-                    href="https://coox.one/emm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="editorial-link font-medium"
-                    style={{ color: t.fg }}
-                  >
-                    coox.one
-                  </a>
-                  {" "}— 新域名上线
-                </p>
+              <div className="relative flex items-center justify-center py-2 px-4 sm:px-6 w-full max-w-2xl">
+                <div className="flex-1 text-center text-[11px] tracking-wide overflow-hidden" style={{ color: t.fgSecondary }}>
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={bannerIndex}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                    >
+                      {banners[bannerIndex].text}
+                      <a
+                        href={banners[bannerIndex].link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="editorial-link font-medium"
+                        style={{ color: t.fg }}
+                      >
+                        {banners[bannerIndex].link.label}
+                      </a>
+                      {banners[bannerIndex].suffix}
+                    </motion.p>
+                  </AnimatePresence>
+                </div>
                 <button
                   onClick={dismissBanner}
-                  className="flex-shrink-0 transition-opacity duration-200 hover:opacity-50 cursor-pointer"
+                  className="absolute right-4 sm:right-6 flex-shrink-0 transition-opacity duration-200 hover:opacity-50 cursor-pointer"
                   style={{ color: t.fgMuted }}
                   aria-label="关闭横幅"
                 >
