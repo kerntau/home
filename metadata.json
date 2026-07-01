@@ -1,6 +1,0 @@
-{
-  "name": "kerntau Space",
-  "description": "A beautiful, Miyazaki-inspired 3D floating island personal portal for kerntau.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

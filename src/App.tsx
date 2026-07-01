@@ -34,7 +34,7 @@ const THEMES: Record<ThemeMode, ThemeColors> = {
     hover: "rgba(10,10,10,0.04)",
   },
   dark: {
-    bg: "#0A0A0A",
+    bg: "#0A0E14",
     fg: "#FAFAFA",
     fgSecondary: "rgba(250,250,250,0.45)",
     fgMuted: "rgba(250,250,250,0.25)",
@@ -71,6 +71,11 @@ const ABOUT = [
 ] as const;
 
 const YEAR = new Date().getFullYear();
+
+const BANNERS = [
+  { text: "新域名 ", link: { label: "coox.one", url: "https://coox.one" }, suffix: " 已上线" },
+  { text: "迁移至 Cloudflare，不稳定敬请谅解，稳定访问 ", link: { label: "cot.wiki", url: "https://cot.wiki" }, suffix: "" },
+];
 
 // ======== CUSTOM ICONS ========
 
@@ -130,7 +135,16 @@ function playWindChime() {
   }
 }
 
-// ======== MOTION ========
+function fallbackCopy(text: string) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); } catch { /* noop */ }
+  document.body.removeChild(ta);
+}
 
 const EASE = [0.25, 1, 0.5, 1] as const;
 
@@ -152,31 +166,43 @@ const scaleIn = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: EASE } },
 };
 
+const dividerIn = {
+  hidden: { opacity: 0, scaleX: 0 },
+  visible: { opacity: 1, scaleX: 1, transition: { duration: 0.6, ease: EASE, delay: 0.2 } },
+};
+
 // ======== UPTIME (isolated to prevent full-tree re-render every second) ========
 
 function Uptime() {
-  const [uptime, setUptime] = useState("");
+  const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const start = new Date("2025-11-10T00:00:00").getTime();
+    const el = ref.current;
+    if (!el) return;
     const update = () => {
       const diff = Date.now() - start;
       const d = Math.floor(diff / 86400000);
       const h = Math.floor((diff % 86400000) / 3600000);
       const m = Math.floor((diff % 3600000) / 60000);
       const s = Math.floor((diff % 60000) / 1000);
-      setUptime(`${d}d ${h}h ${m}m ${s}s`);
+      el.textContent = `${d}天 ${String(h).padStart(2, "0")}时 ${String(m).padStart(2, "0")}分 ${String(s).padStart(2, "0")}秒`;
     };
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
   }, []);
-  return <>{uptime}</>;
+  return <span ref={ref} />;
 }
 
 // ======== RAIN BACKDROP ========
 
 function RainBackdrop({ theme }: { theme: ThemeMode }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
+  const colorRef = useRef(
+    theme === "dark" ? { r: 250, g: 250, b: 250 } : { r: 10, g: 10, b: 10 }
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -184,55 +210,238 @@ function RainBackdrop({ theme }: { theme: ThemeMode }) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
-    const WIND = 0.35;
+    // Reduced motion: skip rain entirely
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    interface Drop { x: number; y: number; length: number; speed: number; opacity: number; }
+    const dpr = window.devicePixelRatio || 1;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    ctx.scale(dpr, dpr);
+
+    // --- Multi-layer parallax rain ---
+    interface Drop {
+      x: number; y: number; length: number; speed: number;
+      opacity: number; lineWidth: number; layer: number;
+    }
     const drops: Drop[] = [];
-    const count = Math.min(90, Math.floor(width / 14));
-    for (let i = 0; i < count; i++) {
-      drops.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        length: 8 + Math.random() * 18,
-        speed: 3 + Math.random() * 5,
-        opacity: 0.06 + Math.random() * 0.14,
-      });
+    const isMobile = width < 768;
+    const totalDrops = Math.min(isMobile ? 80 : 180, Math.floor(width / (isMobile ? 10 : 6)));
+    const layerConfigs = [
+      { ratio: 0.4, sMin: 2, sMax: 4, lMin: 5, lMax: 10, oMin: 0.03, oMax: 0.07, lw: 0.5 },
+      { ratio: 0.35, sMin: 4, sMax: 7, lMin: 9, lMax: 18, oMin: 0.06, oMax: 0.13, lw: 1 },
+      { ratio: 0.25, sMin: 7, sMax: 12, lMin: 14, lMax: 26, oMin: 0.10, oMax: 0.20, lw: 1.5 },
+    ];
+    for (let li = 0; li < layerConfigs.length; li++) {
+      const lc = layerConfigs[li];
+      const n = Math.floor(totalDrops * lc.ratio);
+      for (let i = 0; i < n; i++) {
+        drops.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          length: lc.lMin + Math.random() * (lc.lMax - lc.lMin),
+          speed: lc.sMin + Math.random() * (lc.sMax - lc.sMin),
+          opacity: lc.oMin + Math.random() * (lc.oMax - lc.oMin),
+          lineWidth: lc.lw,
+          layer: li,
+        });
+      }
     }
 
+    // --- Elliptical ripple rings (perspective, multi-ring, staggered) ---
+    interface Ring { x: number; y: number; r: number; maxR: number; o: number; delay: number; aspect: number; }
+    const rings: Ring[] = [];
+
+    // --- Splash particles (gravity-affected) ---
+    interface Splash { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; o: number; size: number; }
+    const splashes: Splash[] = [];
+
+    // --- Impact flashes (brief bright dot at landing point) ---
+    interface Flash { x: number; y: number; r: number; o: number; life: number; }
+    const flashes: Flash[] = [];
+
+    // --- Lightning ---
+    let lightning = 0;
+    let lightningTimer = 0;
+    let nextLightning = 6000 + Math.random() * 18000;
+
     let raf: number;
-    const animate = () => {
+    let lastTime = 0;
+
+    const animate = (now: number) => {
+      const dt = lastTime ? Math.min(50, now - lastTime) : 16;
+      lastTime = now;
+
       ctx.clearRect(0, 0, width, height);
-      const base = theme === "dark" ? "250,250,250" : "10,10,10";
+      const target = themeRef.current === "dark"
+        ? { r: 250, g: 250, b: 250 }
+        : { r: 10, g: 10, b: 10 };
+      colorRef.current.r += (target.r - colorRef.current.r) * 0.05;
+      colorRef.current.g += (target.g - colorRef.current.g) * 0.05;
+      colorRef.current.b += (target.b - colorRef.current.b) * 0.05;
+      const base = `${Math.round(colorRef.current.r)},${Math.round(colorRef.current.g)},${Math.round(colorRef.current.b)}`;
+      const wind = 0.28 + Math.sin(now * 0.0003) * 0.12;
+      // Rain intensity oscillation (gusts)
+      const intensity = 0.75 + 0.25 * Math.sin(now * 0.00015) + 0.12 * Math.sin(now * 0.0007);
+
+      // Lightning flash
+      lightningTimer += dt;
+      if (lightningTimer > nextLightning) {
+        lightning = themeRef.current === "dark" ? 0.12 : 0.07;
+        lightningTimer = 0;
+        nextLightning = 8000 + Math.random() * 22000;
+      }
+      if (lightning > 0) {
+        ctx.fillStyle = `rgba(255,255,255,${lightning})`;
+        ctx.fillRect(0, 0, width, height);
+        lightning *= 0.88;
+        if (lightning < 0.002) lightning = 0;
+      }
+
+      // Rain drops (globalAlpha — no per-drop gradient allocation)
       drops.forEach((d) => {
-        ctx.strokeStyle = `rgba(${base},${d.opacity})`;
-        ctx.lineWidth = 1;
+        const x2 = d.x + wind * d.length;
+        const y2 = d.y + d.length;
+        ctx.globalAlpha = d.opacity;
+        ctx.strokeStyle = `rgb(${base})`;
+        ctx.lineWidth = d.lineWidth;
         ctx.beginPath();
         ctx.moveTo(d.x, d.y);
-        ctx.lineTo(d.x + WIND * d.length, d.y + d.length);
+        ctx.lineTo(x2, y2);
         ctx.stroke();
-        d.y += d.speed;
-        d.x += WIND * d.speed;
-        if (d.y > height) { d.y = -d.length; d.x = Math.random() * width; }
+
+        const sp = d.speed * intensity;
+        d.y += sp;
+        d.x += wind * sp;
+
+        if (d.y > height) {
+          const sx = d.x + wind * d.length;
+          const sy = height - 1;
+          if (d.layer >= 1 && Math.random() > 0.2) {
+            // Impact flash (brief bright dot)
+            flashes.push({ x: sx, y: sy, r: 1 + Math.random() * 1.5, o: d.opacity * 3.5, life: 0 });
+            // Multi-ring elliptical ripples (staggered, decelerating)
+            const ringCount = d.layer === 2 ? 3 : 2;
+            const baseSize = 3 + Math.random() * (d.layer === 2 ? 9 : 5);
+            for (let ri = 0; ri < ringCount; ri++) {
+              rings.push({
+                x: sx, y: sy, r: 0,
+                maxR: baseSize * (1 - ri * 0.2),
+                o: d.opacity * (2.8 - ri * 0.6),
+                delay: ri * 7,
+                aspect: 0.3 + Math.random() * 0.1,
+              });
+            }
+            // Splash particles
+            if (d.layer === 2 || (d.layer === 1 && Math.random() > 0.4)) {
+              const pCount = 2 + Math.floor(Math.random() * 4);
+              for (let pi = 0; pi < pCount; pi++) {
+                const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.7;
+                const pSpeed = 0.6 + Math.random() * 1.8;
+                splashes.push({
+                  x: sx, y: sy,
+                  vx: Math.cos(angle) * pSpeed + wind * 2,
+                  vy: Math.sin(angle) * pSpeed,
+                  life: 0,
+                  maxLife: 250 + Math.random() * 350,
+                  o: d.opacity * 3.5,
+                  size: 0.6 + Math.random() * 1.2,
+                });
+              }
+            }
+          }
+          d.y = -d.length;
+          d.x = Math.random() * width;
+        }
         if (d.x > width) d.x = 0;
+        if (d.x < -20) d.x = width;
       });
+      ctx.globalAlpha = 1;
+
+      // Impact flashes (brief bright dot at landing point, ~120ms)
+      for (let i = flashes.length - 1; i >= 0; i--) {
+        const f = flashes[i];
+        f.life += dt;
+        if (f.life > 120) { flashes.splice(i, 1); continue; }
+        const lr = f.life / 120;
+        ctx.fillStyle = `rgba(${base},${Math.min(1, f.o * (1 - lr))})`;
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r * (1 + lr * 0.5), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Elliptical ripple rings (full ellipse, decelerating, thinning)
+      for (let i = rings.length - 1; i >= 0; i--) {
+        const ring = rings[i];
+        if (ring.delay > 0) { ring.delay -= dt; continue; }
+        const progress = ring.r / ring.maxR;
+        ring.r += (1 - progress) * 0.8 + 0.05;
+        ring.o *= 0.94;
+        if (ring.r >= ring.maxR || ring.o < 0.004) { rings.splice(i, 1); continue; }
+        ctx.strokeStyle = `rgba(${base},${ring.o})`;
+        ctx.lineWidth = 0.8 * (1 - progress) + 0.2;
+        ctx.beginPath();
+        ctx.ellipse(ring.x, ring.y, ring.r, ring.r * ring.aspect, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Splash particles with gravity
+      for (let i = splashes.length - 1; i >= 0; i--) {
+        const sp = splashes[i];
+        sp.life += dt;
+        if (sp.life > sp.maxLife) { splashes.splice(i, 1); continue; }
+        sp.vy += 0.1; // gravity
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        const lr = sp.life / sp.maxLife;
+        const alpha = sp.o * (1 - lr);
+        ctx.fillStyle = `rgba(${base},${alpha})`;
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, sp.size * (1 - lr * 0.4), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Subtle bottom mist
+      const grad = ctx.createLinearGradient(0, height * 0.75, 0, height);
+      grad.addColorStop(0, `rgba(${base},0)`);
+      grad.addColorStop(1, `rgba(${base},${themeRef.current === "dark" ? 0.03 : 0.018})`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, height * 0.75, width, height * 0.25);
+
       raf = requestAnimationFrame(animate);
     };
-    animate();
+    raf = requestAnimationFrame(animate);
 
     const handleResize = () => {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+      ctx.scale(dpr, dpr);
+    };
+    const handleVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(raf);
+      } else {
+        lastTime = 0; // reset to avoid dt jump
+        raf = requestAnimationFrame(animate);
+      }
     };
     window.addEventListener("resize", handleResize);
+    document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [theme]);
+  }, []); // theme via ref — no re-init on toggle
 
-  return <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
+  return <canvas ref={canvasRef} aria-hidden="true" className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />;
 }
 
 // ======== APP ========
@@ -248,6 +457,9 @@ export default function App() {
   const [chiming, setChiming] = useState(false);
   const [showBanner, setShowBanner] = useState(() => !sessionStorage.getItem("banner-dismissed-v2"));
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [avatarSrc, setAvatarSrc] = useState("/avatar.png");
+  const [showInitials, setShowInitials] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const email = "cotovo@qq.com";
@@ -255,31 +467,44 @@ export default function App() {
   const ToggleIcon = theme === "light" ? Moon : Sun;
 
   useEffect(() => {
-    localStorage.setItem("theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", THEMES[theme].bg);
   }, [theme]);
 
-  useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current); }, []);
+  // Auto-follow system theme (only if user hasn't manually chosen)
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = (e: MediaQueryListEvent) => {
+      if (!localStorage.getItem("theme")) {
+        setTheme(e.matches ? "dark" : "light");
+      }
+    };
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
-  const banners = [
-    { text: "新域名 ", link: { label: "coox.one", url: "https://coox.one" }, suffix: " 已上线" },
-    { text: "迁移至 Cloudflare，不稳定敬请谅解，稳定访问 ", link: { label: "cot.wiki", url: "https://cot.wiki" }, suffix: "" },
-  ];
+  useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current); }, []);
 
   useEffect(() => {
     if (!showBanner) return;
-    const id = setInterval(() => setBannerIndex((i) => (i + 1) % banners.length), 1500);
+    const id = setInterval(() => setBannerIndex((i) => (i + 1) % BANNERS.length), 2600);
     return () => clearInterval(id);
   }, [showBanner]);
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(email).then(() => {
+    const onCopy = () => {
       setCopied(true);
       setShowToast(true);
       if (copyTimer.current) clearTimeout(copyTimer.current);
       copyTimer.current = setTimeout(() => { setCopied(false); setShowToast(false); }, 2000);
-    });
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(email).then(onCopy).catch(() => { fallbackCopy(email); onCopy(); });
+    } else {
+      fallbackCopy(email);
+      onCopy();
+    }
   }, []);
 
   const handleChime = useCallback(() => {
@@ -291,6 +516,14 @@ export default function App() {
   const dismissBanner = useCallback(() => {
     sessionStorage.setItem("banner-dismissed-v2", "1");
     setShowBanner(false);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(prev => {
+      const next = prev === "light" ? "dark" : "light";
+      localStorage.setItem("theme", next);
+      return next;
+    });
   }, []);
 
   return (
@@ -329,17 +562,17 @@ export default function App() {
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.3, ease: "easeOut" }}
                     >
-                      {banners[bannerIndex].text}
+                      {BANNERS[bannerIndex].text}
                       <a
-                        href={banners[bannerIndex].link.url}
+                        href={BANNERS[bannerIndex].link.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="editorial-link font-medium"
                         style={{ color: t.fg }}
                       >
-                        {banners[bannerIndex].link.label}
+                        {BANNERS[bannerIndex].link.label}
                       </a>
-                      {banners[bannerIndex].suffix}
+                      {BANNERS[bannerIndex].suffix}
                     </motion.p>
                   </AnimatePresence>
                 </div>
@@ -382,17 +615,47 @@ export default function App() {
         >
           {/* Avatar */}
           <motion.div variants={scaleIn} className="relative mb-6 sm:mb-8">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden">
-              <img
-                src="/avatar.png"
-                alt="kerntau"
-                width={80}
-                height={80}
-                className="w-full h-full rounded-full object-cover"
-              />
+            <div
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden relative transition-transform duration-500 hover:scale-105"
+              style={{ border: `1px solid ${t.divider}` }}
+            >
+              {!imgLoaded && (
+                <div
+                  className="absolute inset-0 animate-pulse"
+                  style={{ background: theme === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)" }}
+                />
+              )}
+              {showInitials ? (
+                <div
+                  className="w-full h-full flex items-center justify-center font-serif text-2xl"
+                  style={{ color: t.fgSecondary, background: t.hover }}
+                >
+                  P
+                </div>
+              ) : (
+                <img
+                  src={avatarSrc}
+                  alt="kerntau"
+                  width={80}
+                  height={80}
+                  onLoad={() => setImgLoaded(true)}
+                  onError={() => {
+                    if (avatarSrc === "/avatar.png") {
+                      setAvatarSrc("https://github.com/cotovo.png");
+                    } else {
+                      setShowInitials(true);
+                      setImgLoaded(true);
+                    }
+                  }}
+                  className="w-full h-full object-cover"
+                  style={{ opacity: imgLoaded ? 1 : 0, transition: "opacity 0.3s ease" }}
+                />
+              )}
             </div>
-            <span
-              className="absolute bottom-0.5 right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border-2"
+            <motion.span
+              animate={{ opacity: [0.35, 1, 0.35] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute bottom-1 right-1 w-2 h-2 rounded-full border-2 z-10"
               style={{ backgroundColor: t.fg, borderColor: t.bg }}
             />
           </motion.div>
@@ -431,9 +694,9 @@ export default function App() {
 
           {/* Divider */}
           <motion.div
-            variants={fadeUp}
+            variants={dividerIn}
             className="h-px w-10 sm:w-12 mb-6 sm:mb-8"
-            style={{ backgroundColor: t.divider }}
+            style={{ backgroundColor: t.divider, transformOrigin: "center" }}
           />
 
           {/* Navigate */}
@@ -444,10 +707,10 @@ export default function App() {
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex items-center gap-2 text-sm font-medium transition-opacity duration-200 hover:opacity-50"
+                className="group flex items-center gap-2 text-sm font-medium transition-all duration-200 hover:scale-105"
                 style={{ color: t.fg }}
               >
-                <Icon className="w-3.5 h-3.5" style={{ color: t.fgMuted }} />
+                <Icon className="w-3.5 h-3.5 transition-colors duration-200 group-hover:text-current" style={{ color: t.fgMuted }} />
                 <span className="editorial-link">{label}</span>
               </a>
             ))}
@@ -461,11 +724,17 @@ export default function App() {
                 <button
                   key={s.label}
                   onClick={handleCopy}
-                  className="transition-opacity duration-200 hover:opacity-50 cursor-pointer"
+                  className="group relative p-2 -m-2 rounded-full transition-all duration-200 hover:scale-110 cursor-pointer"
                   style={{ color: copied ? t.fg : t.fgSecondary }}
                   aria-label={s.label}
                 >
                   {copied ? <Check className="w-[18px] h-[18px]" /> : <Icon className="w-[18px] h-[18px]" />}
+                  <span
+                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 whitespace-nowrap pointer-events-none"
+                    style={{ backgroundColor: t.fg, color: t.bg }}
+                  >
+                    {s.label}
+                  </span>
                 </button>
               ) : (
                 <a
@@ -473,11 +742,17 @@ export default function App() {
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="transition-opacity duration-200 hover:opacity-50"
+                  className="group relative p-2 -m-2 rounded-full transition-all duration-200 hover:scale-110"
                   style={{ color: t.fgSecondary }}
                   aria-label={s.label}
                 >
                   <Icon className="w-[18px] h-[18px]" />
+                  <span
+                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 whitespace-nowrap pointer-events-none"
+                    style={{ backgroundColor: t.fg, color: t.bg }}
+                  >
+                    {s.label}
+                  </span>
                 </a>
               );
             })}
@@ -485,25 +760,27 @@ export default function App() {
 
           {/* Divider */}
           <motion.div
-            variants={fadeUp}
+            variants={dividerIn}
             className="h-px w-10 sm:w-12 mb-6 sm:mb-8"
-            style={{ backgroundColor: t.divider }}
+            style={{ backgroundColor: t.divider, transformOrigin: "center" }}
           />
 
           {/* Quote */}
           <motion.p
             variants={fadeUp}
-            className="font-serif text-base italic text-center leading-relaxed mb-6 sm:mb-8"
+            className="font-serif text-base italic text-center leading-relaxed mb-6 sm:mb-8 relative"
             style={{ color: t.fgSecondary }}
           >
+            <span className="font-serif text-2xl mr-0.5" style={{ color: t.fgMuted }}>"</span>
             起风了，唯有努力生存。
+            <span className="font-serif text-2xl ml-0.5" style={{ color: t.fgMuted }}>"</span>
           </motion.p>
 
           {/* Controls */}
           <motion.div variants={fadeUp} className="flex items-center gap-3 sm:gap-4 mb-5">
             <button
               onClick={handleChime}
-              className="relative p-2.5 rounded-full transition-colors duration-200 cursor-pointer"
+              className="group relative p-2.5 rounded-full transition-colors duration-200 cursor-pointer"
               style={{ backgroundColor: t.hover }}
               aria-label="播放风铃音效"
             >
@@ -527,15 +804,34 @@ export default function App() {
                     />
                   ))}
               </AnimatePresence>
+              <span
+                className="absolute right-full mr-2 top-1/2 -translate-y-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 whitespace-nowrap pointer-events-none"
+                style={{ backgroundColor: t.fg, color: t.bg }}
+              >
+                轻抚风铃
+              </span>
             </button>
 
             <button
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-              className="p-2.5 rounded-full transition-colors duration-200 cursor-pointer"
+              onClick={toggleTheme}
+              className="group relative p-2.5 rounded-full transition-colors duration-200 cursor-pointer"
               style={{ backgroundColor: t.hover }}
               aria-label="切换明暗主题"
             >
-              <ToggleIcon className="w-4 h-4" style={{ color: t.fgSecondary }} />
+              <motion.div
+                key={theme}
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <ToggleIcon className="w-4 h-4" style={{ color: t.fgSecondary }} />
+              </motion.div>
+              <span
+                className="absolute left-full ml-2 top-1/2 -translate-y-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 whitespace-nowrap pointer-events-none"
+                style={{ backgroundColor: t.fg, color: t.bg }}
+              >
+                切换主题
+              </span>
             </button>
           </motion.div>
 
@@ -545,7 +841,7 @@ export default function App() {
               © {YEAR} kerntau
             </p>
             <p className="text-[10px] tracking-wide" style={{ color: t.fgMuted }}>
-              本站由 Cloudflare 强力驱动 · 运行 <Uptime />
+              本站由 <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer" className="editorial-link">Cloudflare</a> 强力驱动 · 运行 <Uptime />
             </p>
           </motion.div>
         </motion.div>

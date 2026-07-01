@@ -2,10 +2,24 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function() {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#0A0E14' : '#FAFAFA');
+      })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Noto+Sans+SC:wght@400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FAFAFA" />
+    <link rel="preload" as="image" href="/avatar.png" />
     <meta name="description" content="kerntau — 前端开发者，湖北十堰。个人主页，链接、作品与联系方式。" />
     <meta name="author" content="kerntau" />
     <meta property="og:title" content="kerntau Space" />
@@ -13,7 +27,25 @@
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://coox.one" />
     <meta property="og:image" content="/avatar.png" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:site_name" content="kerntau" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="kerntau Space" />
+    <meta name="twitter:description" content="前端开发者，湖北十堰。个人主页，链接、作品与联系方式。" />
+    <meta name="twitter:image" content="/avatar.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "kerntau",
+      "url": "https://coox.one",
+      "jobTitle": "Frontend Developer",
+      "sameAs": [
+        "https://github.com/cotovo",
+        "https://v.douyin.com/HWMgjLaTtFk",
+        "https://space.bilibili.com/9655855"
+      ]
+    }
+    </script>
     <title>kerntau Space</title>
   </head>
   <body>
