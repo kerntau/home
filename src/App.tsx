@@ -783,7 +783,7 @@ export default function App() {
     <MotionConfig reducedMotion="user">
       <main
         aria-label="kerntau 个人主页"
-        className="themed relative min-h-screen w-full overflow-x-hidden font-sans flex items-center justify-center"
+        className="themed relative min-h-dvh w-full overflow-x-hidden font-sans flex items-center justify-center"
         style={{ background: 'var(--t-bg)', color: 'var(--t-fg)' }}
       >
         {/* Rain Backdrop */}
@@ -867,7 +867,7 @@ export default function App() {
           variants={container}
           initial="hidden"
           animate="visible"
-          className="relative z-10 w-full max-w-md px-6 sm:px-8 py-12 flex flex-col items-center"
+          className="relative z-10 w-full max-w-md px-6 sm:px-8 py-[calc(3rem+env(safe-area-inset-top))] pb-[calc(3rem+env(safe-area-inset-bottom))] flex flex-col items-center"
         >
           {/* Avatar */}
           <motion.div variants={scaleIn} className="relative mb-6 sm:mb-8">
