@@ -1006,8 +1006,9 @@ export default function App() {
               transition={{ duration: 0.25, ease: "easeOut" }}
               className="themed fixed left-1/2 z-50 text-xs font-medium px-4 py-2 rounded-full whitespace-nowrap"
               style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)', top: showBanner ? "3.5rem" : "1.5rem" }}
-              role="status"
-              aria-live="polite"
+              role={copyFailed ? "alert" : "status"}
+              aria-live={copyFailed ? "assertive" : "polite"}
+              aria-atomic="true"
             >
               {copyFailed ? "复制失败，请手动打开邮箱" : "邮箱已复制"}
             </motion.div>
