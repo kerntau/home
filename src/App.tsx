@@ -49,6 +49,7 @@ interface LinkItem {
   label: string;
   url: string;
   icon: LucideIcon;
+  ariaLabel?: string;
   copyable?: boolean;
 }
 
@@ -58,10 +59,10 @@ const NAV_LINKS: LinkItem[] = [
 ];
 
 const SOCIALS: LinkItem[] = [
-  { label: "Email", url: "mailto:cotovo@qq.com", icon: AtSign, copyable: true },
-  { label: "GitHub", url: "https://github.com/cotovo", icon: Github },
-  { label: "抖音", url: "https://v.douyin.com/HWMgjLaTtFk", icon: DouyinIcon },
-  { label: "Bilibili", url: "https://space.bilibili.com/9655855", icon: BilibiliIcon },
+  { label: "Email", url: "mailto:cotovo@qq.com", icon: AtSign, ariaLabel: "复制邮箱地址", copyable: true },
+  { label: "GitHub", url: "https://github.com/cotovo", icon: Github, ariaLabel: "打开 GitHub 主页" },
+  { label: "抖音", url: "https://v.douyin.com/HWMgjLaTtFk", icon: DouyinIcon, ariaLabel: "打开抖音主页" },
+  { label: "Bilibili", url: "https://space.bilibili.com/9655855", icon: BilibiliIcon, ariaLabel: "打开 Bilibili 主页" },
 ];
 
 const ABOUT = [
@@ -1033,7 +1034,7 @@ export default function App() {
                   onClick={handleCopy}
                   className="group relative flex h-11 w-11 items-center justify-center rounded-full themed-interactive hover:scale-105 cursor-pointer"
                   style={{ color: copied ? 'var(--t-fg)' : 'var(--t-fg-secondary)' }}
-                  aria-label={s.label}
+                  aria-label={s.ariaLabel ?? s.label}
                 >
                   {copied ? <Check className="w-[18px] h-[18px]" strokeWidth={1.75} /> : <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />}
                   <span
@@ -1052,7 +1053,7 @@ export default function App() {
                   rel="noopener noreferrer"
                   className="group relative flex h-11 w-11 items-center justify-center rounded-full themed-interactive hover:scale-105"
                   style={{ color: 'var(--t-fg-secondary)' }}
-                  aria-label={s.label}
+                  aria-label={s.ariaLabel ?? s.label}
                 >
                   <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />
                   <span
