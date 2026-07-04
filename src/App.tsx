@@ -1042,6 +1042,7 @@ export default function App() {
                   height={80}
                   decoding="async"
                   fetchPriority="high"
+                  referrerPolicy="no-referrer"
                   onLoad={() => setImgLoaded(true)}
                   onError={() => {
                     if (avatarSrc === "/avatar.png") {
