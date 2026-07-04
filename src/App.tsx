@@ -451,9 +451,7 @@ function RainBackdrop({ theme }: { theme: ThemeMode }) {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Reduced motion: skip rain entirely
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     const getDpr = () => window.devicePixelRatio || 1;
     let width = window.innerWidth;
     let height = window.innerHeight;
@@ -466,6 +464,8 @@ function RainBackdrop({ theme }: { theme: ThemeMode }) {
       canvas.style.height = height + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
+
+    const clearCanvas = () => ctx.clearRect(0, 0, width, height);
 
     syncCanvasSize();
 
@@ -515,10 +515,17 @@ function RainBackdrop({ theme }: { theme: ThemeMode }) {
     let lightningTimer = 0;
     let nextLightning = 6000 + Math.random() * 18000;
 
-    let raf: number;
+    let raf: number | null = null;
     let lastTime = 0;
+    const shouldAnimate = () => !motionQuery.matches && !document.hidden;
 
     const animate = (now: number) => {
+      raf = null;
+      if (!shouldAnimate()) {
+        if (motionQuery.matches) clearCanvas();
+        return;
+      }
+
       const dt = lastTime ? Math.min(50, now - lastTime) : 16;
       lastTime = now;
 
@@ -660,27 +667,52 @@ function RainBackdrop({ theme }: { theme: ThemeMode }) {
 
       raf = requestAnimationFrame(animate);
     };
-    raf = requestAnimationFrame(animate);
+
+    const startRain = () => {
+      if (raf !== null || !shouldAnimate()) return;
+      lastTime = 0;
+      raf = requestAnimationFrame(animate);
+    };
+
+    const stopRain = (clear = false) => {
+      if (raf !== null) {
+        cancelAnimationFrame(raf);
+        raf = null;
+      }
+      lastTime = 0;
+      if (clear) clearCanvas();
+    };
 
     const handleResize = () => {
       width = window.innerWidth;
       height = window.innerHeight;
       syncCanvasSize();
+      if (motionQuery.matches) clearCanvas();
     };
     const handleVisibility = () => {
       if (document.hidden) {
-        cancelAnimationFrame(raf);
+        stopRain();
       } else {
-        lastTime = 0; // reset to avoid dt jump
-        raf = requestAnimationFrame(animate);
+        startRain();
       }
     };
+    const handleMotionPreference = () => {
+      if (motionQuery.matches) {
+        stopRain(true);
+      } else {
+        startRain();
+      }
+    };
+
+    handleMotionPreference();
     window.addEventListener("resize", handleResize);
     document.addEventListener("visibilitychange", handleVisibility);
+    motionQuery.addEventListener("change", handleMotionPreference);
     return () => {
-      cancelAnimationFrame(raf);
+      stopRain();
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("visibilitychange", handleVisibility);
+      motionQuery.removeEventListener("change", handleMotionPreference);
     };
   }, []); // theme via ref — no re-init on toggle
 
