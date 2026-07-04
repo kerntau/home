@@ -728,18 +728,18 @@ function RainBackdrop({ theme }: { theme: ThemeMode }) {
       ctx.fillStyle = grad;
       ctx.fillRect(0, height * 0.75, width, height * 0.25);
 
-      raf = requestAnimationFrame(animate);
+      raf = window.requestAnimationFrame(animate);
     };
 
     const startRain = () => {
       if (raf !== null || !shouldAnimate()) return;
       lastTime = 0;
-      raf = requestAnimationFrame(animate);
+      raf = window.requestAnimationFrame(animate);
     };
 
     const stopRain = (clear = false) => {
       if (raf !== null) {
-        cancelAnimationFrame(raf);
+        window.cancelAnimationFrame(raf);
         raf = null;
       }
       lastTime = 0;
