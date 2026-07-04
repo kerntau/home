@@ -137,14 +137,28 @@ function playWindChime() {
 }
 
 function fallbackCopy(text: string) {
+  const activeElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const ta = document.createElement("textarea");
   ta.value = text;
+  ta.readOnly = true;
   ta.style.position = "fixed";
+  ta.style.left = "-9999px";
+  ta.style.top = "0";
   ta.style.opacity = "0";
   document.body.appendChild(ta);
-  ta.select();
-  try { document.execCommand("copy"); } catch { /* noop */ }
-  document.body.removeChild(ta);
+  try {
+    ta.focus({ preventScroll: true });
+    ta.select();
+    ta.setSelectionRange(0, text.length);
+    document.execCommand("copy");
+  } catch {
+    /* noop */
+  } finally {
+    document.body.removeChild(ta);
+    if (activeElement?.isConnected) {
+      activeElement.focus({ preventScroll: true });
+    }
+  }
 }
 
 const EASE = [0.25, 1, 0.5, 1] as const;
