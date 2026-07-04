@@ -912,6 +912,8 @@ export default function App() {
 
   const dismissBanner = useCallback(() => {
     sessionStorage.setItem("banner-dismissed-v2", "1");
+    setBannerHoverPaused(false);
+    setBannerFocusPaused(false);
     setShowBanner(false);
   }, []);
 
