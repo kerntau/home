@@ -430,8 +430,31 @@ function Uptime() {
       el.textContent = `${d}天 ${String(h).padStart(2, "0")}时 ${String(m).padStart(2, "0")}分 ${String(s).padStart(2, "0")}秒`;
     };
     update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    const stopTimer = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+    const startTimer = () => {
+      if (intervalId || document.hidden) return;
+      update();
+      intervalId = setInterval(update, 1000);
+    };
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopTimer();
+      } else {
+        startTimer();
+      }
+    };
+    startTimer();
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      stopTimer();
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, []);
   return <span ref={ref} />;
 }
