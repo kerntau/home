@@ -799,8 +799,30 @@ export default function App() {
 
   useEffect(() => {
     if (!showBanner || reduceMotion) return;
-    const id = setInterval(() => setBannerIndex((i) => (i + 1) % BANNERS.length), 2600);
-    return () => clearInterval(id);
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    const stopTimer = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+    const startTimer = () => {
+      if (intervalId || document.hidden) return;
+      intervalId = setInterval(() => setBannerIndex((i) => (i + 1) % BANNERS.length), 2600);
+    };
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopTimer();
+      } else {
+        startTimer();
+      }
+    };
+    startTimer();
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      stopTimer();
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [showBanner, reduceMotion]);
 
   const handleCopy = useCallback(() => {
