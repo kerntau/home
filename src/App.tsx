@@ -807,7 +807,8 @@ export default function App() {
   const [chiming, setChiming] = useState(false);
   const [showBanner, setShowBanner] = useState(() => !sessionStorage.getItem("banner-dismissed-v2"));
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [bannerPaused, setBannerPaused] = useState(false);
+  const [bannerHoverPaused, setBannerHoverPaused] = useState(false);
+  const [bannerFocusPaused, setBannerFocusPaused] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [avatarSrc, setAvatarSrc] = useState("/avatar.png");
   const [showInitials, setShowInitials] = useState(false);
@@ -821,6 +822,7 @@ export default function App() {
   const email = "cotovo@qq.com";
   const ToggleIcon = theme === "light" ? Moon : Sun;
   const nextThemeLabel = theme === "light" ? "深色" : "浅色";
+  const bannerPaused = bannerHoverPaused || bannerFocusPaused;
 
   useLayoutEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -950,11 +952,15 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -24 }}
               transition={{ duration: 0.45, ease: EASE }}
-              onPointerEnter={() => setBannerPaused(true)}
-              onPointerLeave={() => setBannerPaused(false)}
-              onFocusCapture={() => setBannerPaused(true)}
+              onPointerEnter={(event) => {
+                if (event.pointerType !== "touch") setBannerHoverPaused(true);
+              }}
+              onPointerLeave={(event) => {
+                if (event.pointerType !== "touch") setBannerHoverPaused(false);
+              }}
+              onFocusCapture={() => setBannerFocusPaused(true)}
               onBlurCapture={(event) => {
-                if (!event.currentTarget.contains(event.relatedTarget)) setBannerPaused(false);
+                if (!event.currentTarget.contains(event.relatedTarget)) setBannerFocusPaused(false);
               }}
               className="themed fixed top-0 left-0 right-0 z-40 flex items-center justify-center"
               style={{
