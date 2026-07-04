@@ -1034,6 +1034,8 @@ export default function App() {
                   alt="kerntau"
                   width={80}
                   height={80}
+                  decoding="async"
+                  fetchPriority="high"
                   onLoad={() => setImgLoaded(true)}
                   onError={() => {
                     if (avatarSrc === "/avatar.png") {
