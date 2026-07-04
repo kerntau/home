@@ -197,18 +197,24 @@ const PET_ROWS = 9;
 type PetAction = "idle" | "running-right" | "running-left" | "waving" | "jumping";
 
 const PET_ACTIONS: Record<PetAction, { row: number; durations: number[]; loop: boolean }> = {
-  idle: { row: 0, durations: [280, 110, 110, 140, 140, 320], loop: true },
-  "running-right": { row: 1, durations: [120, 120, 120, 120, 120, 120, 120, 220], loop: true },
-  "running-left": { row: 2, durations: [120, 120, 120, 120, 120, 120, 120, 220], loop: true },
-  waving: { row: 3, durations: [140, 140, 140, 280], loop: false },
-  jumping: { row: 4, durations: [140, 140, 140, 140, 280], loop: false },
+  idle: { row: 0, durations: [360, 120, 120, 170, 150, 420], loop: true },
+  "running-right": { row: 1, durations: [110, 110, 120, 110, 110, 120, 120, 160], loop: true },
+  "running-left": { row: 2, durations: [110, 110, 120, 110, 110, 120, 120, 160], loop: true },
+  waving: { row: 3, durations: [120, 130, 150, 360], loop: false },
+  jumping: { row: 4, durations: [110, 120, 150, 160, 260], loop: false },
 };
 
 const PET_RESTING_ACTIONS: PetAction[] = ["idle", "waving", "jumping"];
-const PET_WALK_SPEED = 44;
+const PET_WALK_SPEED = 52;
+const PET_STROLL_MIN_DELAY = 1700;
+const PET_STROLL_DELAY_RANGE = 2800;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
+}
+
+function getPetActionDuration(action: PetAction) {
+  return PET_ACTIONS[action].durations.reduce((sum, value) => sum + value, 0);
 }
 
 function getPetGutter() {
@@ -227,6 +233,13 @@ function getInitialPetX() {
   return Math.max(gutter, window.innerWidth - getEstimatedPetWidth() - gutter);
 }
 
+function getPetRoamMin(min: number, max: number) {
+  if (typeof window === "undefined") return min;
+  const available = Math.max(0, max - min);
+  const preferred = window.innerWidth < 640 ? 72 : Math.max(120, window.innerWidth * 0.28);
+  return Math.max(min, max - Math.min(available, preferred));
+}
+
 function YuexinmiaoPet() {
   const [action, setAction] = useState<PetAction>("idle");
   const [frame, setFrame] = useState(0);
@@ -241,6 +254,8 @@ function YuexinmiaoPet() {
   const boundsRef = useRef({ min: getPetGutter(), max: getInitialPetX() });
   const reducedMotionRef = useRef(false);
   const pageVisibleRef = useRef(!document.hidden);
+  const actionRef = useRef<PetAction>("idle");
+  const actionSequenceRef = useRef(0);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -252,6 +267,7 @@ function YuexinmiaoPet() {
 
   useEffect(() => {
     setFrame(0);
+    actionRef.current = action;
   }, [action]);
 
   useEffect(() => {
@@ -312,6 +328,17 @@ function YuexinmiaoPet() {
     }
   }, []);
 
+  const freezePetAtCurrentX = useCallback(() => {
+    const left = petRef.current?.getBoundingClientRect().left;
+    if (typeof left !== "number") return;
+
+    const { min, max } = boundsRef.current;
+    const next = clamp(Math.round(left), min, max);
+    travelXRef.current = next;
+    setTravelDuration(0.18);
+    setTravelX(next);
+  }, []);
+
   useEffect(() => {
     const handleVisibility = () => {
       const visible = !document.hidden;
@@ -343,7 +370,8 @@ function YuexinmiaoPet() {
 
       const { min, max } = boundsRef.current;
       const currentX = clamp(travelXRef.current, min, max);
-      const range = max - min;
+      const roamMin = getPetRoamMin(min, max);
+      const range = max - roamMin;
 
       if (range < 24) {
         scheduleStroll(2400);
@@ -354,7 +382,7 @@ function YuexinmiaoPet() {
       let nextX = currentX;
 
       for (let i = 0; i < 6; i++) {
-        const candidate = Math.round(min + Math.random() * range);
+        const candidate = Math.round(roamMin + Math.random() * range);
         if (Math.abs(candidate - currentX) >= minStep) {
           nextX = candidate;
           break;
@@ -372,12 +400,13 @@ function YuexinmiaoPet() {
 
       setAction(nextAction);
       setTravelDuration(duration / 1000);
+      travelXRef.current = nextX;
       setTravelX(nextX);
 
       walkTimer.current = window.setTimeout(() => {
         if (reducedMotionRef.current || !pageVisibleRef.current) return;
         setAction("idle");
-        scheduleStroll(1600 + Math.random() * 2600);
+        scheduleStroll(PET_STROLL_MIN_DELAY + Math.random() * PET_STROLL_DELAY_RANGE);
       }, duration + 120);
     }, delay);
   }, [clearWalkTimer]);
@@ -400,19 +429,24 @@ function YuexinmiaoPet() {
     return clearWalkTimer;
   }, [clearWalkTimer, pageVisible, reducedMotion, scheduleStroll]);
 
-  const playAction = useCallback((nextAction: PetAction) => {
+  const playAction = useCallback((nextAction: PetAction, options: { force?: boolean; resumeDelay?: number } = {}) => {
     if (reducedMotion || !pageVisible) return;
+    if (!options.force && (actionRef.current === nextAction || actionRef.current === "jumping")) return;
     if (actionTimer.current) window.clearTimeout(actionTimer.current);
+    const sequence = actionSequenceRef.current + 1;
+    actionSequenceRef.current = sequence;
     clearWalkTimer();
-    const duration = PET_ACTIONS[nextAction].durations.reduce((sum, value) => sum + value, 0);
-    setTravelDuration(0.28);
+    freezePetAtCurrentX();
+    const duration = getPetActionDuration(nextAction);
+    setTravelDuration(nextAction === "jumping" ? 0.18 : 0.24);
     setAction(nextAction);
     actionTimer.current = window.setTimeout(() => {
+      if (sequence !== actionSequenceRef.current) return;
       setAction("idle");
       actionTimer.current = null;
-      scheduleStroll(1000);
+      scheduleStroll(options.resumeDelay ?? 1100 + Math.random() * 900);
     }, duration + 80);
-  }, [clearWalkTimer, pageVisible, reducedMotion, scheduleStroll]);
+  }, [clearWalkTimer, freezePetAtCurrentX, pageVisible, reducedMotion, scheduleStroll]);
 
   const handlePointerEnter = useCallback((event: PointerEvent<HTMLButtonElement>) => {
     if (event.pointerType === "touch") return;
@@ -423,30 +457,45 @@ function YuexinmiaoPet() {
   const displayFrame = Math.min(frame, current.durations.length - 1);
   const x = (displayFrame / (PET_COLUMNS - 1)) * 100;
   const y = (current.row / (PET_ROWS - 1)) * 100;
+  const running = action === "running-right" || action === "running-left";
+  const animatedY = reducedMotion ? 0 : action === "jumping" ? [0, -14, -20, -8, 0] : action === "idle" ? [0, -1, 0] : running ? [0, 1, -1, 0] : 0;
+  const animatedRotate = reducedMotion ? 0 : running ? (action === "running-right" ? [0, 1.2, -1, 0] : [0, -1.2, 1, 0]) : action === "jumping" ? [0, -3, 2, 0] : 0;
+  const entranceY = reducedMotion ? 0 : 16;
+  const entranceScale = reducedMotion ? 1 : 0.92;
 
   return (
     <motion.button
       ref={petRef}
       type="button"
       aria-label="和月薪喵打招呼"
-      initial={{ opacity: 0, y: 12, scale: 0.96 }}
+      initial={{ opacity: 0, x: travelX, y: entranceY, scale: entranceScale, rotate: reducedMotion ? 0 : -2 }}
       animate={{
         opacity: 1,
         x: travelX,
-        y: action === "jumping" && !reducedMotion ? [0, -16, 0] : 0,
+        y: animatedY,
+        rotate: animatedRotate,
         scale: 1,
       }}
-      whileHover={reducedMotion ? undefined : { scale: 1.02 }}
-      whileTap={reducedMotion ? undefined : { scale: 0.96 }}
+      whileHover={reducedMotion ? undefined : { scale: 1.025 }}
+      whileTap={reducedMotion ? undefined : { scale: 0.94 }}
       transition={{
-        opacity: { duration: 0.35, ease: EASE },
-        x: { duration: PET_RESTING_ACTIONS.includes(action) ? 0.35 : travelDuration, ease: "easeInOut" },
-        y: { duration: action === "jumping" ? 0.55 : 0.25, ease: EASE },
+        opacity: { duration: reducedMotion ? 0 : 0.38, ease: EASE },
+        x: { duration: PET_RESTING_ACTIONS.includes(action) ? 0.22 : travelDuration, ease: "easeInOut" },
+        y: action === "idle"
+          ? { duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: reducedMotion ? 0 : 0.28 }
+          : running
+            ? { duration: 0.48, repeat: Infinity, ease: "easeInOut" }
+            : { duration: action === "jumping" ? 0.68 : 0.25, ease: EASE },
+        rotate: running
+          ? { duration: 0.48, repeat: Infinity, ease: "easeInOut" }
+          : { duration: action === "jumping" ? 0.68 : 0.2, ease: EASE },
         scale: { duration: 0.2, ease: EASE },
       }}
       onPointerEnter={handlePointerEnter}
-      onFocus={() => playAction("waving")}
-      onClick={() => playAction("jumping")}
+      onFocus={(event) => {
+        if (event.currentTarget.matches(":focus-visible")) playAction("waving");
+      }}
+      onClick={() => playAction("jumping", { force: true, resumeDelay: 1600 })}
       className="themed-interactive fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-0 sm:bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 block cursor-pointer border-0 bg-transparent p-0 opacity-90 hover:opacity-100 focus-visible:opacity-100"
       style={{
         width: "clamp(72px, 10vw, 96px)",
