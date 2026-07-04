@@ -1133,7 +1133,7 @@ export default function App() {
                   onClick={handleCopy}
                   className="group relative flex h-11 w-11 items-center justify-center rounded-full themed-interactive hover:scale-105 cursor-pointer"
                   style={{ color: copied ? 'var(--t-fg)' : 'var(--t-fg-secondary)' }}
-                  aria-label={s.ariaLabel ?? s.label}
+                  aria-label={copied ? "邮箱地址已复制" : s.ariaLabel ?? s.label}
                 >
                   {copied ? <Check className="w-[18px] h-[18px]" strokeWidth={1.75} /> : <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />}
                   <span
