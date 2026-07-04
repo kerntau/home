@@ -116,7 +116,8 @@ function playWindChime() {
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
     vibrato.frequency.value = 6;
     vibratoGain.gain.value = 3;
-    vibrato.connect(osc.frequency);
+    vibrato.connect(vibratoGain);
+    vibratoGain.connect(osc.frequency);
     vibrato.start();
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.05);
