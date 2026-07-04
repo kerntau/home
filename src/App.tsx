@@ -469,17 +469,17 @@ function Uptime() {
       el.textContent = `${d}天 ${String(h).padStart(2, "0")}时 ${String(m).padStart(2, "0")}分 ${String(s).padStart(2, "0")}秒`;
     };
     update();
-    let intervalId: ReturnType<typeof setInterval> | null = null;
+    let intervalId: number | null = null;
     const stopTimer = () => {
       if (intervalId) {
-        clearInterval(intervalId);
+        window.clearInterval(intervalId);
         intervalId = null;
       }
     };
     const startTimer = () => {
       if (intervalId || document.hidden) return;
       update();
-      intervalId = setInterval(update, 1000);
+      intervalId = window.setInterval(update, 1000);
     };
     const handleVisibility = () => {
       if (document.hidden) {
@@ -839,16 +839,16 @@ export default function App() {
 
   useEffect(() => {
     if (!showBanner || reduceMotion) return;
-    let intervalId: ReturnType<typeof setInterval> | null = null;
+    let intervalId: number | null = null;
     const stopTimer = () => {
       if (intervalId) {
-        clearInterval(intervalId);
+        window.clearInterval(intervalId);
         intervalId = null;
       }
     };
     const startTimer = () => {
       if (intervalId || document.hidden) return;
-      intervalId = setInterval(() => setBannerIndex((i) => (i + 1) % BANNERS.length), 2600);
+      intervalId = window.setInterval(() => setBannerIndex((i) => (i + 1) % BANNERS.length), 2600);
     };
     const handleVisibility = () => {
       if (document.hidden) {
