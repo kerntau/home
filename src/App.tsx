@@ -7,7 +7,7 @@
 import { useState, useCallback, useRef, useEffect, useLayoutEffect } from "react";
 import { motion, AnimatePresence, MotionConfig } from "motion/react";
 import {
-  House, NotebookText, Github, AtSign, Check, Volume2, Sun, Moon,
+  House, NotebookText, Github, AtSign, Check, Wind, Sun, Moon,
   MapPinned, CalendarDays, Braces, X, type LucideIcon,
 } from "lucide-react";
 
@@ -381,7 +381,7 @@ function YuexinmiaoPet() {
       initial={{ opacity: 0, y: 12, scale: 0.96 }}
       animate={{
         opacity: 1,
-        x: reducedMotion ? 0 : travelX,
+        x: travelX,
         y: action === "jumping" && !reducedMotion ? [0, -16, 0] : 0,
         scale: 1,
       }}
@@ -1042,7 +1042,7 @@ export default function App() {
                 animate={chiming ? { rotate: [0, -15, 15, -10, 10, 0] } : {}}
                 transition={{ duration: 0.6 }}
               >
-                <Volume2 className="w-4 h-4" strokeWidth={1.75} style={{ color: 'var(--t-fg-secondary)' }} />
+                <Wind className="w-4 h-4" strokeWidth={1.75} style={{ color: 'var(--t-fg-secondary)' }} />
               </motion.div>
               <AnimatePresence>
                 {chiming &&
