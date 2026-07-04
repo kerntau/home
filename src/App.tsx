@@ -105,7 +105,7 @@ function playWindChime() {
     const Ctor = window.AudioContext || (window as any).webkitAudioContext;
     if (!Ctor) return;
     if (!sharedAudioCtx || sharedAudioCtx.state === "closed") sharedAudioCtx = new Ctor();
-    if (sharedAudioCtx.state === "suspended") sharedAudioCtx.resume();
+    if (sharedAudioCtx.state === "suspended") void sharedAudioCtx.resume();
     const ctx = sharedAudioCtx;
     const freq = [523.25, 587.33, 659.25, 783.99, 880.0, 1046.5][Math.floor(Math.random() * 6)];
     const osc = ctx.createOscillator();
