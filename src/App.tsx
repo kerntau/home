@@ -4,7 +4,7 @@
  * Pure CSS + Motion.
  */
 
-import { useState, useCallback, useRef, useEffect, useLayoutEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useLayoutEffect, type PointerEvent } from "react";
 import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "motion/react";
 import {
   House, NotebookText, Github, AtSign, Check, Wind, Sun, Moon,
@@ -408,6 +408,11 @@ function YuexinmiaoPet() {
     }, duration + 80);
   }, [clearWalkTimer, pageVisible, reducedMotion, scheduleStroll]);
 
+  const handlePointerEnter = useCallback((event: PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === "touch") return;
+    playAction("waving");
+  }, [playAction]);
+
   const current = PET_ACTIONS[action];
   const displayFrame = Math.min(frame, current.durations.length - 1);
   const x = (displayFrame / (PET_COLUMNS - 1)) * 100;
@@ -433,7 +438,7 @@ function YuexinmiaoPet() {
         y: { duration: action === "jumping" ? 0.55 : 0.25, ease: EASE },
         scale: { duration: 0.2, ease: EASE },
       }}
-      onPointerEnter={() => playAction("waving")}
+      onPointerEnter={handlePointerEnter}
       onFocus={() => playAction("waving")}
       onClick={() => playAction("jumping")}
       className="themed-interactive fixed bottom-[calc(0.75rem+env(safe-area-inset-bottom))] left-0 sm:bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 block cursor-pointer border-0 bg-transparent p-0 opacity-90 hover:opacity-100 focus-visible:opacity-100"
