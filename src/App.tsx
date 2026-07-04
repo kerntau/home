@@ -152,9 +152,9 @@ function fallbackCopy(text: string) {
     ta.focus({ preventScroll: true });
     ta.select();
     ta.setSelectionRange(0, text.length);
-    document.execCommand("copy");
+    return document.execCommand("copy");
   } catch {
-    /* noop */
+    return false;
   } finally {
     document.body.removeChild(ta);
     if (activeElement?.isConnected) {
@@ -802,6 +802,7 @@ export default function App() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [chiming, setChiming] = useState(false);
   const [showBanner, setShowBanner] = useState(() => !sessionStorage.getItem("banner-dismissed-v2"));
@@ -877,21 +878,22 @@ export default function App() {
   }, [showBanner, reduceMotion]);
 
   const handleCopy = useCallback(() => {
-    const onCopy = () => {
-      setCopied(true);
+    const showCopyFeedback = (success: boolean) => {
+      setCopied(success);
+      setCopyFailed(!success);
       setShowToast(true);
       if (copyTimer.current) window.clearTimeout(copyTimer.current);
       copyTimer.current = window.setTimeout(() => {
         setCopied(false);
+        setCopyFailed(false);
         setShowToast(false);
         copyTimer.current = null;
       }, 2000);
     };
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(email).then(onCopy).catch(() => { fallbackCopy(email); onCopy(); });
+      navigator.clipboard.writeText(email).then(() => showCopyFeedback(true)).catch(() => showCopyFeedback(fallbackCopy(email)));
     } else {
-      fallbackCopy(email);
-      onCopy();
+      showCopyFeedback(fallbackCopy(email));
     }
   }, []);
 
@@ -1007,7 +1009,7 @@ export default function App() {
               role="status"
               aria-live="polite"
             >
-              邮箱已复制
+              {copyFailed ? "复制失败，请手动打开邮箱" : "邮箱已复制"}
             </motion.div>
           )}
         </AnimatePresence>
