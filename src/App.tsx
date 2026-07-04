@@ -7,7 +7,7 @@
 import { useState, useCallback, useRef, useEffect, useLayoutEffect, type PointerEvent } from "react";
 import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "motion/react";
 import {
-  House, NotebookText, Github, AtSign, Check, Wind, Sun, Moon,
+  House, NotebookText, Github, Mail, Check, Wind, Sun, Moon,
   MapPinned, CalendarDays, Braces, X, type LucideIcon,
 } from "lucide-react";
 
@@ -59,7 +59,7 @@ const NAV_LINKS: LinkItem[] = [
 ];
 
 const SOCIALS: LinkItem[] = [
-  { label: "Email", url: "mailto:cotovo@qq.com", icon: AtSign, ariaLabel: "复制邮箱地址", copyable: true },
+  { label: "Email", url: "mailto:cotovo@qq.com", icon: Mail, ariaLabel: "复制邮箱地址", copyable: true },
   { label: "GitHub", url: "https://github.com/cotovo", icon: Github, ariaLabel: "打开 GitHub 主页，新窗口" },
   { label: "抖音", url: "https://v.douyin.com/HWMgjLaTtFk", icon: DouyinIcon, ariaLabel: "打开抖音主页，新窗口" },
   { label: "Bilibili", url: "https://space.bilibili.com/9655855", icon: BilibiliIcon, ariaLabel: "打开 Bilibili 主页，新窗口" },
