@@ -126,6 +126,7 @@ function playWindChime() {
     gain.connect(ctx.destination);
     osc.start();
     osc.stop(ctx.currentTime + 1.3);
+    vibrato.stop(ctx.currentTime + 1.3);
     osc.onended = () => {
       osc.disconnect();
       gain.disconnect();
