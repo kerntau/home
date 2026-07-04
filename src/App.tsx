@@ -925,6 +925,7 @@ export default function App() {
             >
               {!imgLoaded && (
                 <div
+                  aria-hidden="true"
                   className="themed absolute inset-0 animate-pulse"
                   style={{ background: 'var(--t-shimmer)' }}
                 />
@@ -957,6 +958,7 @@ export default function App() {
               )}
             </div>
             <motion.span
+              aria-hidden="true"
               animate={reduceMotion ? { opacity: 0.7 } : { opacity: [0.35, 1, 0.35] }}
               transition={reduceMotion ? { duration: 0 } : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               className="themed absolute bottom-1 right-1 w-2 h-2 rounded-full border-2 z-10"
@@ -1035,6 +1037,7 @@ export default function App() {
                 >
                   {copied ? <Check className="w-[18px] h-[18px]" strokeWidth={1.75} /> : <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />}
                   <span
+                    aria-hidden="true"
                     className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
                     style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)' }}
                   >
@@ -1053,6 +1056,7 @@ export default function App() {
                 >
                   <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />
                   <span
+                    aria-hidden="true"
                     className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
                     style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)' }}
                   >
@@ -1101,6 +1105,7 @@ export default function App() {
                   [0, 1].map((i) => (
                     <motion.span
                       key={i}
+                      aria-hidden="true"
                       initial={{ scale: 1, opacity: 0.4 }}
                       animate={{ scale: 2.5 + i * 0.5, opacity: 0 }}
                       exit={{ opacity: 0 }}
@@ -1111,6 +1116,7 @@ export default function App() {
                   ))}
               </AnimatePresence>
               <span
+                aria-hidden="true"
                 className="absolute right-full mr-2 top-1/2 -translate-y-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
                 style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)' }}
               >
@@ -1138,6 +1144,7 @@ export default function App() {
                   [0, 1].map((i) => (
                     <motion.span
                       key={i}
+                      aria-hidden="true"
                       initial={{ scale: 1, opacity: 0.35 }}
                       animate={{ scale: 2.5 + i * 0.5, opacity: 0 }}
                       exit={{ opacity: 0 }}
@@ -1148,6 +1155,7 @@ export default function App() {
                   ))}
               </AnimatePresence>
               <span
+                aria-hidden="true"
                 className="absolute left-full ml-2 top-1/2 -translate-y-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
                 style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)' }}
               >
