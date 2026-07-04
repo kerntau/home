@@ -973,14 +973,14 @@ export default function App() {
           </motion.div>
 
           {/* Socials — icon only */}
-          <motion.div variants={fadeUp} className="flex items-center gap-5 sm:gap-6 mb-8 sm:mb-10">
+          <motion.div variants={fadeUp} className="flex items-center gap-2 sm:gap-3 mb-8 sm:mb-10">
             {SOCIALS.map((s) => {
               const Icon = s.icon;
               return s.copyable ? (
                 <button
                   key={s.label}
                   onClick={handleCopy}
-                  className="group relative p-2 -m-2 rounded-full themed-interactive hover:scale-110 cursor-pointer"
+                  className="group relative flex h-11 w-11 items-center justify-center rounded-full themed-interactive hover:scale-105 cursor-pointer"
                   style={{ color: copied ? 'var(--t-fg)' : 'var(--t-fg-secondary)' }}
                   aria-label={s.label}
                 >
@@ -998,7 +998,7 @@ export default function App() {
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group relative p-2 -m-2 rounded-full themed-interactive hover:scale-110"
+                  className="group relative flex h-11 w-11 items-center justify-center rounded-full themed-interactive hover:scale-105"
                   style={{ color: 'var(--t-fg-secondary)' }}
                   aria-label={s.label}
                 >
@@ -1036,7 +1036,7 @@ export default function App() {
           <motion.div variants={fadeUp} className="flex items-center gap-3 sm:gap-4 mb-5">
             <button
               onClick={handleChime}
-              className="group relative p-2.5 rounded-full themed-interactive cursor-pointer"
+              className="group relative flex h-11 w-11 items-center justify-center rounded-full themed-interactive cursor-pointer"
               style={{ backgroundColor: 'var(--t-hover)' }}
               aria-label="播放风铃音效"
             >
@@ -1070,7 +1070,7 @@ export default function App() {
 
             <button
               onClick={toggleTheme}
-              className="group relative p-2.5 rounded-full themed-interactive cursor-pointer"
+              className="group relative flex h-11 w-11 items-center justify-center rounded-full themed-interactive cursor-pointer"
               style={{ backgroundColor: 'var(--t-hover)' }}
               aria-label="切换明暗主题"
             >
