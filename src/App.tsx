@@ -817,9 +817,9 @@ export default function App() {
   }, []);
 
   useEffect(() => () => {
-    if (copyTimer.current) clearTimeout(copyTimer.current);
-    if (chimeTimer.current) clearTimeout(chimeTimer.current);
-    if (themeTimer.current) clearTimeout(themeTimer.current);
+    if (copyTimer.current) window.clearTimeout(copyTimer.current);
+    if (chimeTimer.current) window.clearTimeout(chimeTimer.current);
+    if (themeTimer.current) window.clearTimeout(themeTimer.current);
   }, []);
 
   useEffect(() => {
@@ -854,8 +854,12 @@ export default function App() {
     const onCopy = () => {
       setCopied(true);
       setShowToast(true);
-      if (copyTimer.current) clearTimeout(copyTimer.current);
-      copyTimer.current = setTimeout(() => { setCopied(false); setShowToast(false); }, 2000);
+      if (copyTimer.current) window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => {
+        setCopied(false);
+        setShowToast(false);
+        copyTimer.current = null;
+      }, 2000);
     };
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(email).then(onCopy).catch(() => { fallbackCopy(email); onCopy(); });
@@ -867,8 +871,8 @@ export default function App() {
 
   const handleChime = useCallback(() => {
     setChiming(true);
-    if (chimeTimer.current) clearTimeout(chimeTimer.current);
-    chimeTimer.current = setTimeout(() => {
+    if (chimeTimer.current) window.clearTimeout(chimeTimer.current);
+    chimeTimer.current = window.setTimeout(() => {
       setChiming(false);
       chimeTimer.current = null;
     }, 800);
@@ -887,8 +891,8 @@ export default function App() {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content", THEMES[next].bg);
     setThemeToggling(true);
-    if (themeTimer.current) clearTimeout(themeTimer.current);
-    themeTimer.current = setTimeout(() => {
+    if (themeTimer.current) window.clearTimeout(themeTimer.current);
+    themeTimer.current = window.setTimeout(() => {
       setThemeToggling(false);
       themeTimer.current = null;
     }, 700);
