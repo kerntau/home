@@ -7,7 +7,7 @@
 import { useState, useCallback, useRef, useEffect, useLayoutEffect, type PointerEvent } from "react";
 import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "motion/react";
 import {
-  House, NotebookText, Github, Mail, Check, Wind, Sun, Moon,
+  House, NotebookText, BookOpen, Github, Mail, Check, Wind, Sun, Moon,
   MapPinned, CalendarDays, Braces, X, type LucideIcon,
 } from "lucide-react";
 
@@ -56,6 +56,7 @@ interface LinkItem {
 const NAV_LINKS: LinkItem[] = [
   { label: "Home", url: "https://my.cot.wiki", icon: House, ariaLabel: "打开 Home，新窗口" },
   { label: "Blog", url: "https://blog.cot.wiki", icon: NotebookText, ariaLabel: "打开 Blog，新窗口" },
+  { label: "KB", url: "http://kb.cot.wiki/", icon: BookOpen, ariaLabel: "打开知识库，新窗口" },
 ];
 
 const SOCIALS: LinkItem[] = [
