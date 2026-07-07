@@ -74,7 +74,7 @@ const ABOUT = [
 const YEAR = new Date().getFullYear();
 
 const BANNERS = [
-  { text: "新域名 ", link: { label: "cot.wiki", url: "https://cot.wiki" }, suffix: " 已上线" },
+  { text: "新域名 ", link: { label: "coox.one", url: "https://coox.one" }, suffix: " 已上线" },
   { text: "迁移至 Cloudflare，不稳定敬请谅解，稳定访问 ", link: { label: "cot.wiki", url: "https://cot.wiki" }, suffix: "" },
 ];
 
