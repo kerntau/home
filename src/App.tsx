@@ -54,8 +54,8 @@ interface LinkItem {
 }
 
 const NAV_LINKS: LinkItem[] = [
-  { label: "Home", url: "https://my.coox.one", icon: House, ariaLabel: "打开 Home，新窗口" },
-  { label: "Blog", url: "https://blog.coox.one", icon: NotebookText, ariaLabel: "打开 Blog，新窗口" },
+  { label: "Home", url: "https://my.cot.wiki", icon: House, ariaLabel: "打开 Home，新窗口" },
+  { label: "Blog", url: "https://blog.cot.wiki", icon: NotebookText, ariaLabel: "打开 Blog，新窗口" },
 ];
 
 const SOCIALS: LinkItem[] = [
@@ -74,7 +74,7 @@ const ABOUT = [
 const YEAR = new Date().getFullYear();
 
 const BANNERS = [
-  { text: "新域名 ", link: { label: "coox.one", url: "https://coox.one" }, suffix: " 已上线" },
+  { text: "新域名 ", link: { label: "cot.wiki", url: "https://cot.wiki" }, suffix: " 已上线" },
   { text: "迁移至 Cloudflare，不稳定敬请谅解，稳定访问 ", link: { label: "cot.wiki", url: "https://cot.wiki" }, suffix: "" },
 ];
 
