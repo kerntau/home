@@ -1,5 +1,5 @@
 /**
- * kerntau Space — Minimal
+ * kerntau Home — Minimal
  * Monochrome, serif/sans contrast, generous whitespace.
  * Pure CSS + Motion.
  */
@@ -7,9 +7,10 @@
 import { useState, useCallback, useRef, useEffect, useLayoutEffect, type PointerEvent } from "react";
 import { motion, AnimatePresence, MotionConfig, useReducedMotion } from "motion/react";
 import {
-  House, NotebookText, BookOpen, Github, Mail, Check, Wind, Sun, Moon,
+  House, NotebookText, Github, Mail, Check, Wind, Sun, Moon,
   MapPinned, CalendarDays, Braces, X, type LucideIcon,
 } from "lucide-react";
+import SiteSections from "./components/SiteSections";
 
 // ======== THEME ========
 
@@ -54,9 +55,9 @@ interface LinkItem {
 }
 
 const NAV_LINKS: LinkItem[] = [
-  { label: "Home", url: "https://my.cot.wiki", icon: House, ariaLabel: "打开 Home，新窗口" },
-  { label: "Blog", url: "https://blog.cot.wiki", icon: NotebookText, ariaLabel: "打开 Blog，新窗口" },
-  { label: "KB", url: "http://kb.cot.wiki/", icon: BookOpen, ariaLabel: "打开知识库，新窗口" },
+  { label: "About", url: "#about", icon: House, ariaLabel: "前往介绍" },
+  { label: "Writing", url: "#writing", icon: NotebookText, ariaLabel: "前往文章" },
+  { label: "Projects", url: "#projects", icon: Braces, ariaLabel: "前往项目" },
 ];
 
 const SOCIALS: LinkItem[] = [
@@ -69,7 +70,7 @@ const SOCIALS: LinkItem[] = [
 const ABOUT = [
   { icon: MapPinned, value: "湖北 · 十堰" },
   { icon: CalendarDays, value: "2006 / 10" },
-  { icon: Braces, value: "计算机科学" },
+  { icon: Braces, value: "信息安全" },
 ] as const;
 
 const YEAR = new Date().getFullYear();
@@ -983,11 +984,21 @@ export default function App() {
     setTheme(next);
   }, [theme]);
 
+  useEffect(() => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!id) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(id)?.scrollIntoView({ block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
   return (
     <MotionConfig reducedMotion="user">
       <main
+        id="top"
         aria-label="kerntau 个人主页"
-        className="themed relative min-h-dvh w-full overflow-x-hidden font-sans flex items-center justify-center"
+        className="themed relative min-h-dvh w-full overflow-x-hidden font-sans"
         style={{ background: 'var(--t-bg)', color: 'var(--t-fg)' }}
       >
         {/* Rain Backdrop */}
@@ -1023,7 +1034,7 @@ export default function App() {
               }}
             >
               <div className="relative flex items-center justify-center py-2 px-4 sm:px-6 w-full max-w-2xl">
-                <div className="themed flex-1 text-center text-[11px] tracking-wide overflow-hidden" style={{ color: 'var(--t-fg-secondary)' }}>
+                <div className="themed flex-1 overflow-hidden text-center text-[11px]" style={{ color: 'var(--t-fg-secondary)' }}>
                   <AnimatePresence mode="wait">
                     <motion.p
                       key={bannerIndex}
@@ -1085,7 +1096,7 @@ export default function App() {
           variants={container}
           initial="hidden"
           animate="visible"
-          className="relative z-10 w-full max-w-md px-6 sm:px-8 py-[calc(3rem+env(safe-area-inset-top))] pb-[calc(3rem+env(safe-area-inset-bottom))] flex flex-col items-center"
+          className="relative z-10 mx-auto flex min-h-[82dvh] w-full max-w-md flex-col items-center justify-center px-6 py-[calc(4.5rem+env(safe-area-inset-top))] pb-[calc(4rem+env(safe-area-inset-bottom))] sm:px-8"
         >
           {/* Avatar */}
           <motion.div variants={scaleIn} className="relative mb-6 sm:mb-8">
@@ -1105,7 +1116,7 @@ export default function App() {
                   className="themed w-full h-full flex items-center justify-center font-serif text-2xl"
                   style={{ color: 'var(--t-fg-secondary)', background: 'var(--t-hover)' }}
                 >
-                  P
+                  K
                 </div>
               ) : (
                 <img
@@ -1142,7 +1153,7 @@ export default function App() {
           {/* Name */}
           <motion.h1
             variants={fadeUp}
-            className="font-serif text-4xl sm:text-5xl font-normal tracking-tight leading-none mb-3"
+            className="mb-3 font-serif text-4xl font-normal leading-none sm:text-5xl"
           >
             kerntau
           </motion.h1>
@@ -1150,10 +1161,10 @@ export default function App() {
           {/* Tagline */}
           <motion.p
             variants={fadeUp}
-            className="text-xs tracking-[0.25em] uppercase font-medium mb-4"
+            className="mb-4 text-xs font-medium uppercase"
             style={{ color: 'var(--t-fg-secondary)' }}
           >
-            Frontend Crafter
+            Security &amp; Frontend
           </motion.p>
 
           {/* About inline */}
@@ -1184,8 +1195,6 @@ export default function App() {
               <a
                 key={label}
                 href={url}
-                target="_blank"
-                rel="noopener noreferrer"
                 aria-label={ariaLabel ?? label}
                 className="group -mx-2 -my-3 flex min-h-11 items-center gap-2 rounded-full px-2 py-3 text-sm font-medium themed-interactive hover:scale-105"
                 style={{ color: 'var(--t-fg)' }}
@@ -1217,7 +1226,7 @@ export default function App() {
                   </span>
                   <span
                     aria-hidden="true"
-                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
+                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] leading-none px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
                     style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)' }}
                   >
                     {s.label}
@@ -1236,7 +1245,7 @@ export default function App() {
                   <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} />
                   <span
                     aria-hidden="true"
-                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
+                    className="absolute top-full mt-2 left-1/2 -translate-x-1/2 text-[10px] leading-none px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
                     style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)' }}
                   >
                     {s.label}
@@ -1296,7 +1305,7 @@ export default function App() {
               </AnimatePresence>
               <span
                 aria-hidden="true"
-                className="absolute right-full mr-2 top-1/2 -translate-y-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
+                className="absolute right-full mr-2 top-1/2 -translate-y-1/2 text-[10px] leading-none px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
                 style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)' }}
               >
                 轻抚风铃
@@ -1330,7 +1339,7 @@ export default function App() {
               </AnimatePresence>
               <span
                 aria-hidden="true"
-                className="absolute left-full ml-2 top-1/2 -translate-y-1/2 text-[10px] leading-none tracking-wider px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
+                className="absolute left-full ml-2 top-1/2 -translate-y-1/2 text-[10px] leading-none px-1.5 py-0.5 rounded-full opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 group-focus-visible:opacity-100 group-focus-visible:scale-100 themed-interactive whitespace-nowrap pointer-events-none"
                 style={{ backgroundColor: 'var(--t-fg)', color: 'var(--t-bg)' }}
               >
                 切换主题
@@ -1338,16 +1347,18 @@ export default function App() {
             </button>
           </motion.div>
 
-          {/* Footer */}
-          <motion.div variants={fadeUp} className="flex flex-col items-center gap-2">
-            <p className="text-[10px] tracking-[0.2em] uppercase" style={{ color: 'var(--t-fg-muted)' }}>
-              © {YEAR} kerntau
-            </p>
-            <p className="text-[10px] tracking-wide" style={{ color: 'var(--t-fg-muted)' }}>
-              本站由 <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer" aria-label="打开 Cloudflare，新窗口" className="editorial-link">Cloudflare</a> 强力驱动 · 运行 <Uptime />
-            </p>
-          </motion.div>
         </motion.div>
+
+        <SiteSections />
+
+        <footer className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center gap-2 border-t border-divider px-6 py-10 text-center">
+          <p className="text-[11px] text-muted uppercase">
+            © {YEAR} kerntau
+          </p>
+          <p className="text-[11px] leading-5 text-muted">
+            本站由 <a href="https://cloudflare.com" target="_blank" rel="noopener noreferrer" aria-label="打开 Cloudflare，新窗口" className="editorial-link">Cloudflare</a> 强力驱动 · 运行 <Uptime />
+          </p>
+        </footer>
       </main>
     </MotionConfig>
   );
