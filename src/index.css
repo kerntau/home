@@ -1201,11 +1201,40 @@ html[data-theme="dark"] .project-visual-space {
   border: 0;
   background-color: transparent;
   background-repeat: no-repeat;
-  cursor: pointer;
+  cursor: grab;
   image-rendering: auto;
   pointer-events: auto;
-  touch-action: manipulation;
-  will-change: transform, opacity;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  backface-visibility: hidden;
+  contain: layout paint style;
+  transform-origin: bottom center;
+  will-change: transform, opacity, background-position;
+}
+
+.pet-companion.is-dragging {
+  cursor: grabbing;
+}
+
+.pet-companion.is-page-moving {
+  pointer-events: none;
+}
+
+.pet-companion:focus-visible {
+  border-radius: 6px;
+  outline: 2px solid var(--t-accent);
+  outline-offset: 3px;
+}
+
+.pet-status {
+  position: fixed;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .toast {
@@ -1519,7 +1548,7 @@ html[data-theme="dark"] .project-visual-space {
   }
 
   .pet-companion {
-    width: 62px;
+    width: 56px;
   }
 }
 

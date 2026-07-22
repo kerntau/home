@@ -220,7 +220,7 @@ export default function App() {
     }
 
     setToast(copied ? "copied" : "error");
-    if (copied) triggerPet("copied");
+    triggerPet(copied ? "copied" : "error");
     if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setToast(null), 2600);
   };
@@ -379,8 +379,8 @@ export default function App() {
                 <a href="https://space.bilibili.com/9655855" target="_blank" rel="noopener noreferrer" aria-label="打开 Bilibili 主页，新窗口">
                   <MonitorPlay aria-hidden="true" /><span>Bilibili</span>
                 </a>
-                <a href="https://v.douyin.com/HWMgjLaTtFk" target="_blank" rel="noopener noreferrer" aria-label="打开抖音主页，新窗口">
-                  <Music2 aria-hidden="true" /><span>抖音</span>
+                <a href="https://v.douyin.com/HWMgjLaTtFk" target="_blank" rel="noopener noreferrer" aria-label="打开 Douyin 主页，新窗口">
+                  <Music2 aria-hidden="true" /><span>Douyin</span>
                 </a>
               </motion.div>
             </div>
