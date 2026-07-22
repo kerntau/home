@@ -61,7 +61,7 @@ export const PROJECTS: Project[] = [
   {
     name: "Blog / 序栈",
     description: "统一整合博客、知识库、搜索、归档、多语言与 SEO 管线的全栈技术站点。",
-    repository: "https://github.com/cotovo/blog",
+    repository: "https://github.com/kerntau/blog",
     stack: "Next.js · TypeScript",
   },
   {
@@ -81,15 +81,15 @@ export const DESTINATIONS: Destination[] = [
   },
   {
     name: "知识库",
-    address: "blog.cot.wiki/kb",
+    address: "kb.cot.wiki",
     description: "基础原理、算法与长期可复用的笔记。",
-    url: "https://blog.cot.wiki/kb",
+    url: "https://kb.cot.wiki",
   },
   {
     name: "GitHub",
-    address: "github.com/cotovo",
+    address: "github.com/kerntau",
     description: "公开仓库、实验项目与代码轨迹。",
-    url: "https://github.com/cotovo",
+    url: "https://github.com/kerntau",
   },
   {
     name: "Bilibili",

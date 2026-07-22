@@ -62,7 +62,7 @@ const NAV_LINKS: LinkItem[] = [
 
 const SOCIALS: LinkItem[] = [
   { label: "Email", url: "mailto:cotovo@qq.com", icon: Mail, ariaLabel: "复制邮箱地址", copyable: true },
-  { label: "GitHub", url: "https://github.com/cotovo", icon: Github, ariaLabel: "打开 GitHub 主页，新窗口" },
+  { label: "GitHub", url: "https://github.com/kerntau", icon: Github, ariaLabel: "打开 GitHub 主页，新窗口" },
   { label: "抖音", url: "https://v.douyin.com/HWMgjLaTtFk", icon: DouyinIcon, ariaLabel: "打开抖音主页，新窗口" },
   { label: "Bilibili", url: "https://space.bilibili.com/9655855", icon: BilibiliIcon, ariaLabel: "打开 Bilibili 主页，新窗口" },
 ];
@@ -1130,7 +1130,7 @@ export default function App() {
                   onLoad={() => setImgLoaded(true)}
                   onError={() => {
                     if (avatarSrc === "/avatar.png") {
-                      setAvatarSrc("https://github.com/cotovo.png");
+                      setAvatarSrc("https://github.com/kerntau.png");
                     } else {
                       setShowInitials(true);
                       setImgLoaded(true);
