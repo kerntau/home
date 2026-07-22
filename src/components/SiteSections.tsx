@@ -1,48 +1,25 @@
-import { ArrowUpRight, BookOpenText, Code2, Compass, History } from "lucide-react";
-import { motion } from "motion/react";
+import {
+  ArrowUpRight,
+  Braces,
+  Compass,
+  Github,
+  History,
+  type LucideIcon,
+} from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
-import { ARTICLES, DESTINATIONS, PROJECTS, TIMELINE } from "../data/site";
+import { PROJECTS, TIMELINE } from "../data/site";
 
-const EASE = [0.25, 1, 0.5, 1] as const;
-
-function SectionHeading({
-  id,
-  index,
-  title,
-  description,
-  icon: Icon,
-}: {
-  id: string;
-  index: string;
-  title: string;
-  description: string;
-  icon: typeof BookOpenText;
-}) {
-  return (
-    <header id={id} className="section-heading scroll-mt-24">
-      <div className="section-kicker">
-        <Icon aria-hidden="true" className="h-4 w-4" strokeWidth={1.6} />
-        <span>{index}</span>
-      </div>
-      <div>
-        <h2 className="font-serif text-2xl font-normal sm:text-3xl">{title}</h2>
-        <p className="mt-2 max-w-xl text-sm leading-7 text-secondary">{description}</p>
-      </div>
-    </header>
-  );
-}
-
-function ExternalArrow() {
-  return <ArrowUpRight aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={1.6} />;
-}
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const reduceMotion = useReducedMotion() === true;
   return (
     <motion.section
-      initial={{ opacity: 0, y: 18 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
+      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.45, ease: EASE }}
+      transition={{ duration: 0.46, ease: EASE }}
       className={className}
     >
       {children}
@@ -50,144 +27,152 @@ function Reveal({ children, className = "" }: { children: ReactNode; className?:
   );
 }
 
+function SectionHeading({
+  id,
+  index,
+  label,
+  title,
+  description,
+  icon: Icon,
+}: {
+  id: string;
+  index: string;
+  label: string;
+  title: string;
+  description: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <header id={id} className="section-heading scroll-mt-28">
+      <div className="section-index">
+        <span>{index}</span>
+        <Icon aria-hidden="true" />
+        <span>{label}</span>
+      </div>
+      <div className="section-title-block">
+        <h2>{title}</h2>
+        <p>{description}</p>
+      </div>
+    </header>
+  );
+}
+
+function ExternalArrow() {
+  return <ArrowUpRight aria-hidden="true" className="external-arrow" />;
+}
+
+function ProjectVisual({ type }: { type: "blog" | "space" }) {
+  if (type === "blog") {
+    return (
+      <div className="project-visual project-visual-blog" aria-hidden="true">
+        <div className="mock-browser-bar"><span /><span /><span /></div>
+        <div className="mock-blog-layout">
+          <p>序栈 / COT</p>
+          <strong>把复杂的问题<br />写得清楚。</strong>
+          <div className="mock-rule" />
+          <small>SECURITY · ALGORITHM · WEB</small>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="project-visual project-visual-space" aria-hidden="true">
+      <div className="mock-browser-bar"><span /><span /><span /></div>
+      <div className="mock-space-layout">
+        <span className="mock-coordinate">32.65 N / 110.78 E</span>
+        <strong>@kerntau</strong>
+        <span className="mock-orbit" />
+        <span className="mock-orbit-dot" />
+        <small>PERSONAL SPACE / 001</small>
+      </div>
+    </div>
+  );
+}
+
 export default function SiteSections() {
   return (
-    <div className="relative z-10 mx-auto w-full max-w-5xl px-5 pb-24 sm:px-8 lg:px-10">
-      <Reveal className="site-section border-t border-divider pt-14 sm:pt-20">
+    <div className="content-shell" id="content">
+      <Reveal className="editorial-section about-section">
         <SectionHeading
           id="about"
-          index="01 / ABOUT"
-          title="在技术与表达之间"
-          description="这里不再只是一个跳转页，而是我在互联网上的统一起点。"
+          index="01"
+          label="ABOUT"
+          title="在系统与表达之间"
+          description="把主页、文章、知识库与开源轨迹收拢为一个持续生长的空间。"
           icon={Compass}
         />
-        <div className="content-grid">
-          <p className="font-serif text-xl leading-9 text-primary sm:text-2xl sm:leading-10">
-            你好，我是 kerntau，一名即将毕业的信息安全专业学生，也在持续实践前端与全栈工程。
+        <div className="about-layout">
+          <p className="about-statement">
+            我是 kerntau，一名信息安全专业学生，也在持续实践前端与全栈工程。
           </p>
-          <div className="space-y-4 text-sm leading-7 text-secondary">
-            <p>我关注网络安全、底层原理与可维护的软件架构，并把学习过程整理成文章、知识库和开源项目。</p>
-            <p>Space 现在承接原主页的内容，同时保留安静、克制、带一点生命感的交互体验。</p>
+          <div className="about-copy">
+            <p>关注网络安全、底层原理与可维护的软件架构，也相信清晰的表达本身就是一种工程能力。</p>
+            <p>这里是所有内容的起点：长期笔记进入知识库，完整文章进入序栈，代码与实验留在 GitHub。</p>
           </div>
+          <dl className="identity-facts">
+            <div><dt>BASE</dt><dd>湖北 · 十堰</dd></div>
+            <div><dt>FOCUS</dt><dd>Security / Web</dd></div>
+            <div><dt>STATUS</dt><dd><span className="status-dot" />持续构建中</dd></div>
+          </dl>
         </div>
       </Reveal>
 
-      <Reveal className="site-section">
-        <SectionHeading
-          id="writing"
-          index="02 / WRITING"
-          title="最近写下的内容"
-          description="技术文章仍然发布在序栈，这里保留最近更新的索引。"
-          icon={BookOpenText}
-        />
-        <div className="divide-y divide-divider border-y border-divider">
-          {ARTICLES.map((article) => (
-            <a
-              key={article.url}
-              href={article.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="content-row group"
-              aria-label={`阅读《${article.title}》，新窗口`}
-            >
-              <div className="min-w-0">
-                <div className="mb-2 flex flex-wrap items-center gap-2 text-[11px] text-muted">
-                  <time dateTime={article.published.replaceAll(".", "-")}>{article.published}</time>
-                  <span aria-hidden="true">/</span>
-                  <span>{article.tags.join(" · ")}</span>
-                </div>
-                <h3 className="text-base font-medium leading-7 text-primary">{article.title}</h3>
-                <p className="mt-1 max-w-2xl text-sm leading-6 text-secondary">{article.summary}</p>
-              </div>
-              <ExternalArrow />
-            </a>
-          ))}
-        </div>
-        <a href="https://blog.cot.wiki/archive" target="_blank" rel="noopener noreferrer" className="section-action">
-          查看全部文章
-          <ExternalArrow />
-        </a>
-      </Reveal>
-
-      <Reveal className="site-section">
+      <Reveal className="editorial-section projects-section">
         <SectionHeading
           id="projects"
-          index="03 / PROJECTS"
+          index="02"
+          label="PROJECTS"
           title="正在维护的项目"
-          description="旧主页不再作为独立产品继续演进，内容与身份入口统一由 Space 承接。"
-          icon={Code2}
+          description="主页不再是孤立入口，Space 与序栈共同构成我的公开工作台。"
+          icon={Braces}
         />
-        <div className="grid gap-px overflow-hidden border border-divider bg-divider sm:grid-cols-2">
-          {PROJECTS.map((project) => (
-            <article key={project.name} className="project-panel bg-surface">
-              <div>
-                <p className="mb-3 text-[11px] text-muted">{project.stack}</p>
-                <h3 className="font-serif text-xl text-primary">{project.name}</h3>
-                <p className="mt-3 text-sm leading-7 text-secondary">{project.description}</p>
+        <div className="project-grid">
+          {PROJECTS.map((project, index) => (
+            <article className="project-card" key={project.name}>
+              <ProjectVisual type={index === 0 ? "blog" : "space"} />
+              <div className="project-copy">
+                <div className="project-label">
+                  <span>0{index + 1}</span>
+                  <span>{project.stack}</span>
+                </div>
+                <h3>{project.name}</h3>
+                <p>{project.description}</p>
+                <a
+                  href={project.repository}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-action"
+                  aria-label={`打开 ${project.name} 源码，新窗口`}
+                >
+                  <Github aria-hidden="true" /> GitHub <ExternalArrow />
+                </a>
               </div>
-              <a
-                href={project.repository}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-link"
-                aria-label={`打开 ${project.name} 源码，新窗口`}
-              >
-                GitHub
-                <ExternalArrow />
-              </a>
             </article>
           ))}
         </div>
       </Reveal>
 
-      <Reveal className="site-section">
-        <SectionHeading
-          id="sites"
-          index="04 / PLACES"
-          title="我在互联网上的去处"
-          description="内容、代码和轻量表达各自有不同的节奏。"
-          icon={Compass}
-        />
-        <div className="divide-y divide-divider border-y border-divider">
-          {DESTINATIONS.map((site) => (
-            <a
-              key={site.url}
-              href={site.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="destination-row group"
-              aria-label={`打开${site.name}，新窗口`}
-            >
-              <div>
-                <h3 className="text-sm font-medium text-primary">{site.name}</h3>
-                <p className="mt-1 text-xs text-muted">{site.address}</p>
-              </div>
-              <p className="hidden text-sm text-secondary sm:block">{site.description}</p>
-              <ExternalArrow />
-            </a>
-          ))}
-        </div>
-      </Reveal>
-
-      <Reveal className="site-section">
+      <Reveal className="editorial-section log-section">
         <SectionHeading
           id="log"
-          index="05 / LOG"
-          title="一些时间节点"
-          description="不追求完整，只记录方向发生变化的时刻。"
+          index="03"
+          label="LOG"
+          title="方向变化的节点"
+          description="不记录所有事情，只留下改变空间形态的时刻。"
           icon={History}
         />
         <ol className="timeline-list">
           {TIMELINE.map((entry, index) => (
             <li key={`${entry.date}-${entry.title}`} className="timeline-row">
-              <time className="text-xs text-muted">{entry.date}</time>
+              <time>{entry.date}</time>
               <span className="timeline-mark" aria-hidden="true">
                 <span className="timeline-dot" />
                 {index < TIMELINE.length - 1 && <span className="timeline-line" />}
               </span>
-              <div className="pb-9">
-                <h3 className="text-sm font-medium text-primary">{entry.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-secondary">{entry.description}</p>
+              <div>
+                <h3>{entry.title}</h3>
+                <p>{entry.description}</p>
               </div>
             </li>
           ))}
