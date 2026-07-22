@@ -61,7 +61,7 @@ const NAV_LINKS: LinkItem[] = [
 ];
 
 const SOCIALS: LinkItem[] = [
-  { label: "Email", url: "mailto:cotovo@qq.com", icon: Mail, ariaLabel: "复制邮箱地址", copyable: true },
+  { label: "Email", url: "mailto:kerntau@outlook.com", icon: Mail, ariaLabel: "复制邮箱地址", copyable: true },
   { label: "GitHub", url: "https://github.com/kerntau", icon: Github, ariaLabel: "打开 GitHub 主页，新窗口" },
   { label: "抖音", url: "https://v.douyin.com/HWMgjLaTtFk", icon: DouyinIcon, ariaLabel: "打开抖音主页，新窗口" },
   { label: "Bilibili", url: "https://space.bilibili.com/9655855", icon: BilibiliIcon, ariaLabel: "打开 Bilibili 主页，新窗口" },
@@ -870,7 +870,7 @@ export default function App() {
   const prefersReducedMotion = useReducedMotion();
   const reduceMotion = prefersReducedMotion === true;
 
-  const email = "cotovo@qq.com";
+  const email = "kerntau@outlook.com";
   const ToggleIcon = theme === "light" ? Moon : Sun;
   const nextThemeLabel = theme === "light" ? "深色" : "浅色";
   const bannerPaused = bannerHoverPaused || bannerFocusPaused;
