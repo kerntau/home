@@ -13,7 +13,7 @@ export default function SignatureBackdrop() {
         className="signature-art"
         viewBox="0 0 920 520"
         role="presentation"
-        initial={false}
+        initial={reduceMotion ? false : { opacity: 0 }}
         animate={reduceMotion ? { opacity: 0.72 } : { opacity: [0, 1, 1] }}
         transition={{
           duration: reduceMotion ? 0 : DURATION,
@@ -37,7 +37,7 @@ export default function SignatureBackdrop() {
               strokeWidth="255"
               strokeLinecap="round"
               pathLength={1}
-              initial={false}
+              initial={reduceMotion ? false : { pathLength: 0 }}
               animate={reduceMotion ? { pathLength: 1 } : { pathLength: [0, 1, 1] }}
               transition={{
                 duration: reduceMotion ? 0 : DURATION,
@@ -64,7 +64,7 @@ export default function SignatureBackdrop() {
         </g>
 
         <motion.g
-          initial={false}
+          initial={reduceMotion ? false : { y: 0 }}
           animate={reduceMotion ? { y: 0 } : { y: [0, 0, 7, -2, 0] }}
           transition={{
             duration: reduceMotion ? 0 : DURATION,
@@ -77,7 +77,7 @@ export default function SignatureBackdrop() {
             className="signature-stroke signature-stroke-glow"
             filter="url(#signature-soft-glow)"
             pathLength={1}
-            initial={false}
+            initial={reduceMotion ? false : { pathLength: 0 }}
             animate={reduceMotion ? { pathLength: 1 } : { pathLength: [0, 0, 1, 1] }}
             transition={{
               duration: reduceMotion ? 0 : DURATION,
@@ -89,7 +89,7 @@ export default function SignatureBackdrop() {
             d="M 642 366 C 706 337, 760 338, 801 345 C 761 354, 728 369, 719 383 C 710 396, 739 396, 774 385"
             className="signature-stroke signature-stroke-fine"
             pathLength={1}
-            initial={false}
+            initial={reduceMotion ? false : { pathLength: 0 }}
             animate={reduceMotion ? { pathLength: 1 } : { pathLength: [0, 0, 1, 1] }}
             transition={{
               duration: reduceMotion ? 0 : DURATION,
@@ -100,7 +100,7 @@ export default function SignatureBackdrop() {
         </motion.g>
 
         <motion.g
-          initial={false}
+          initial={reduceMotion ? false : { opacity: 0, scale: 0.8 }}
           animate={reduceMotion ? { opacity: 0.78, scale: 1 } : { opacity: [0, 0, 1, 0.78], scale: [0.8, 0.8, 1, 1] }}
           transition={{
             duration: reduceMotion ? 0 : DURATION,
