@@ -1,25 +1,26 @@
 import {
+  Activity,
   ArrowUpRight,
   Braces,
   Compass,
-  Github,
   History,
-  type LucideIcon,
+  MapPin,
+  Shield,
 } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { PROJECTS, TIMELINE } from "../data/site";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
+const EASE = [0.83, 0, 0.17, 1] as const;
 
-function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
+function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number; key?: string | number }) {
   const reduceMotion = useReducedMotion() === true;
   return (
     <motion.section
-      initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.12 }}
-      transition={{ duration: 0.46, ease: EASE }}
+      initial={reduceMotion ? false : { y: 20, opacity: 0 }}
+      whileInView={reduceMotion ? undefined : { y: 0, opacity: 1 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.8, delay, ease: EASE }}
       className={className}
     >
       {children}
@@ -27,157 +28,147 @@ function Reveal({ children, className = "" }: { children: ReactNode; className?:
   );
 }
 
-function SectionHeading({
-  id,
-  index,
-  label,
-  title,
-  description,
-  icon: Icon,
-}: {
-  id: string;
-  index: string;
-  label: string;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}) {
-  return (
-    <header id={id} className="section-heading scroll-mt-28">
-      <div className="section-index">
-        <span>{index}</span>
-        <Icon aria-hidden="true" />
-        <span>{label}</span>
-      </div>
-      <div className="section-title-block">
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </div>
-    </header>
-  );
-}
-
-function ExternalArrow() {
-  return <ArrowUpRight aria-hidden="true" className="external-arrow" />;
-}
-
-function ProjectVisual({ type }: { type: "blog" | "space" }) {
-  if (type === "blog") {
-    return (
-      <div className="project-visual project-visual-blog" aria-hidden="true">
-        <div className="mock-browser-bar"><span /><span /><span /></div>
-        <div className="mock-blog-layout">
-          <p>序栈 / COT</p>
-          <strong>把复杂的问题<br />写得清楚。</strong>
-          <div className="mock-rule" />
-          <small>SECURITY · ALGORITHM · WEB</small>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="project-visual project-visual-space" aria-hidden="true">
-      <div className="mock-browser-bar"><span /><span /><span /></div>
-      <div className="mock-space-layout">
-        <span className="mock-coordinate">32.65 N / 110.78 E</span>
-        <strong>@kerntau</strong>
-        <span className="mock-orbit" />
-        <span className="mock-orbit-dot" />
-        <small>PERSONAL SPACE / 001</small>
-      </div>
-    </div>
-  );
-}
-
 export default function SiteSections() {
   return (
-    <div className="content-shell" id="content">
-      <Reveal className="editorial-section about-section">
-        <SectionHeading
-          id="about"
-          index="01"
-          label="ABOUT"
-          title="在系统与表达之间"
-          description="把主页、文章、知识库与开源轨迹收拢为一个持续生长的空间。"
-          icon={Compass}
-        />
-        <div className="about-layout">
-          <p className="about-statement">
-            我是 kerntau，一名信息安全专业学生，也在持续实践前端与全栈工程。
-          </p>
-          <div className="about-copy">
-            <p>关注网络安全、底层原理与可维护的软件架构，也相信清晰的表达本身就是一种工程能力。</p>
-            <p>这里是所有内容的起点：长期笔记进入知识库，完整文章进入序栈，代码与实验留在 GitHub。</p>
+    <section id="content" className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-12 pt-16 md:pt-24 pb-32 flex flex-col gap-24 md:gap-32">
+        
+        {/* About Section */}
+        <Reveal>
+          <div className="grid grid-cols-1 md:grid-cols-12 border border-white/10 bg-white/[0.02] rounded-3xl overflow-hidden shadow-2xl">
+            
+            {/* Header Pill & Name (Left Col) */}
+            <div className="md:col-span-4 p-6 md:p-10 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-center gap-6 bg-white/[0.01]">
+              <div className="flex items-center gap-3 text-sm font-mono font-bold tracking-widest text-white/40 uppercase">
+                <Compass className="w-4 h-4 text-[var(--t-signal)]" />
+                <span>ABOUT</span>
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-[1.15] text-white drop-shadow-md">
+                在系统与<br />表达之间
+              </h2>
+            </div>
+
+            {/* Intro Text (Middle Col) */}
+            <div className="md:col-span-5 p-6 md:p-10 border-b md:border-b-0 md:border-r border-white/10 flex flex-col justify-center gap-6">
+              <p className="text-lg md:text-xl font-bold text-white leading-relaxed drop-shadow-sm">
+                我是 kerntau，一名信息安全专业学生，也在持续实践前端与全栈工程。
+              </p>
+              <p className="text-sm md:text-base text-white/70 leading-relaxed font-medium">
+                把主页、文章、知识库与开源轨迹收拢为一个持续生长的空间。这里是所有内容的起点：长期笔记进入知识库，完整文章进入序栈，代码与实验留在 GitHub。
+              </p>
+            </div>
+
+            {/* Status Stack (Right Col) */}
+            <div className="md:col-span-3 flex flex-col">
+              {/* Focus */}
+              <div className="flex-1 p-5 md:p-8 border-b border-white/10 flex items-center gap-4 hover:bg-[var(--t-signal)]/10 transition-colors cursor-default">
+                  <Shield className="w-5 h-5 text-[var(--t-signal)]" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-0.5">Focus</span>
+                    <span className="text-sm font-bold text-white">Security / Web</span>
+                  </div>
+              </div>
+              {/* Base */}
+              <div className="flex-1 p-5 md:p-8 border-b border-white/10 flex items-center gap-4 hover:bg-[var(--t-signal)]/10 transition-colors cursor-default">
+                  <MapPin className="w-5 h-5 text-[var(--t-signal)]" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-0.5">Base</span>
+                    <span className="text-sm font-bold text-white">湖北 · 十堰</span>
+                  </div>
+              </div>
+              {/* Status */}
+              <div className="flex-1 p-5 md:p-8 flex items-center gap-4 hover:bg-[var(--t-signal)]/10 transition-colors cursor-default">
+                  <Activity className="w-5 h-5 text-[var(--t-signal)]" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-white/40 font-mono uppercase tracking-widest mb-0.5">Status</span>
+                    <span className="text-sm font-bold text-[var(--t-signal)] flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[var(--t-signal)] animate-pulse shadow-[0_0_8px_var(--t-signal)]" />
+                      Building
+                    </span>
+                  </div>
+              </div>
+            </div>
+
           </div>
-          <dl className="identity-facts">
-            <div><dt>BASE</dt><dd>湖北 · 十堰</dd></div>
-            <div><dt>FOCUS</dt><dd>Security / Web</dd></div>
-            <div><dt>STATUS</dt><dd><span className="status-dot" />持续构建中</dd></div>
-          </dl>
-        </div>
-      </Reveal>
+        </Reveal>
 
-      <Reveal className="editorial-section projects-section">
-        <SectionHeading
-          id="projects"
-          index="02"
-          label="PROJECTS"
-          title="正在维护的项目"
-          description="主页不再是孤立入口，Space 与序栈共同构成我的公开工作台。"
-          icon={Braces}
-        />
-        <div className="project-grid">
-          {PROJECTS.map((project, index) => (
-            <article className="project-card" key={project.name}>
-              <ProjectVisual type={index === 0 ? "blog" : "space"} />
-              <div className="project-copy">
-                <div className="project-label">
-                  <span>0{index + 1}</span>
-                  <span>{project.stack}</span>
+        {/* Projects Section */}
+        <Reveal>
+          <div className="flex items-center gap-3 text-xs font-mono font-bold tracking-widest text-[var(--t-muted)] uppercase mb-8 px-4 py-2 w-fit rounded-full border border-white/10 bg-black/40">
+            <Braces className="w-3.5 h-3.5 text-[var(--t-signal)]" />
+            <span>PROJECTS</span>
+          </div>
+
+          <div className="flex flex-col border-t border-white/10">
+            {PROJECTS.map((project, index) => (
+              <motion.a
+                key={project.name}
+                href={project.repository}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-8 py-5 md:py-8 border-b border-white/10 hover:bg-white/[0.04] transition-colors duration-300 px-3 md:px-8 -mx-2 md:-mx-8 rounded-2xl"
+              >
+                <div className="md:col-span-3 flex flex-row md:flex-col items-center md:items-start justify-between md:justify-center gap-2">
+                  <span className="text-sm font-mono font-bold text-white/30 group-hover:text-[var(--t-signal)] transition-colors">
+                    0{index + 1}
+                  </span>
+                  <span className="text-[10px] font-mono text-white/50 tracking-widest uppercase">
+                    {project.stack}
+                  </span>
                 </div>
-                <h3>{project.name}</h3>
-                <p>{project.description}</p>
-                <a
-                  href={project.repository}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-action"
-                  aria-label={`打开 ${project.name} 源码，新窗口`}
-                >
-                  <Github aria-hidden="true" /> GitHub <ExternalArrow />
-                </a>
-              </div>
-            </article>
-          ))}
-        </div>
-      </Reveal>
+                
+                <div className="md:col-span-3 flex items-center">
+                  <h3 className="text-xl md:text-2xl font-black text-white/90 group-hover:text-white uppercase tracking-tight">
+                    {project.name}
+                  </h3>
+                </div>
 
-      <Reveal className="editorial-section log-section">
-        <SectionHeading
-          id="log"
-          index="03"
-          label="LOG"
-          title="方向变化的节点"
-          description="不记录所有事情，只留下改变空间形态的时刻。"
-          icon={History}
-        />
-        <ol className="timeline-list">
-          {TIMELINE.map((entry, index) => (
-            <li key={`${entry.date}-${entry.title}`} className="timeline-row">
-              <time>{entry.date}</time>
-              <span className="timeline-mark" aria-hidden="true">
-                <span className="timeline-dot" />
-                {index < TIMELINE.length - 1 && <span className="timeline-line" />}
-              </span>
-              <div>
-                <h3>{entry.title}</h3>
-                <p>{entry.description}</p>
+                <div className="md:col-span-6 flex items-center justify-between gap-6">
+                  <p className="text-sm text-white/70 group-hover:text-white/90 transition-colors leading-relaxed">
+                    {project.description}
+                  </p>
+                  <ArrowUpRight className="w-5 h-5 text-white/30 group-hover:text-white group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-all shrink-0" />
+                </div>
+              </motion.a>
+            ))}
+          </div>
+        </Reveal>
+
+        {/* Log Section */}
+        <Reveal>
+          <div className="flex items-center gap-3 text-xs font-mono font-bold tracking-widest text-[var(--t-muted)] uppercase mb-10 px-4 py-2 w-fit rounded-full border border-white/10 bg-black/40">
+            <History className="w-3.5 h-3.5 text-[var(--t-signal)]" />
+            <span>LOG</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-0 relative">
+            {/* Desktop Timeline Line */}
+            <div className="hidden md:block absolute left-[25%] top-4 bottom-4 w-px bg-white/10 -ml-px pointer-events-none" />
+            
+            {TIMELINE.map((entry, index) => (
+              <div key={`${entry.date}-${entry.title}`} className="col-span-12 grid grid-cols-1 md:grid-cols-12 group hover:bg-white/[0.04] transition-colors rounded-2xl p-4 md:p-6 -mx-2 md:-mx-6">
+                
+                {/* Date & Node (Left side of timeline) */}
+                <div className="md:col-span-3 flex md:justify-end items-center md:items-start md:pr-12 relative mb-2 md:mb-0">
+                  {/* Node */}
+                  <div className="hidden md:flex absolute right-0 top-1 w-3 h-3 rounded-full bg-black border border-white/30 items-center justify-center translate-x-1.5 group-hover:border-[var(--t-signal)] group-hover:shadow-[0_0_12px_var(--t-signal)] transition-all">
+                    <div className="w-1 h-1 rounded-full bg-[var(--t-signal)] group-hover:bg-[var(--t-signal)] transition-colors" />
+                  </div>
+                  
+                  <time className="text-sm font-mono font-bold tracking-widest text-[var(--t-signal)]/80 group-hover:text-[var(--t-signal)] transition-colors">
+                    {entry.date}
+                  </time>
+                </div>
+
+                {/* Content (Right side of timeline) */}
+                <div className="md:col-span-9 md:pl-12 flex flex-col gap-2">
+                  <h3 className="text-xl font-bold text-white/90 group-hover:text-white transition-colors">{entry.title}</h3>
+                  <p className="text-sm text-white/60 group-hover:text-white/80 transition-colors leading-relaxed max-w-2xl">{entry.description}</p>
+                </div>
               </div>
-            </li>
-          ))}
-        </ol>
-      </Reveal>
-    </div>
+            ))}
+          </div>
+        </Reveal>
+
+      </section>
   );
 }

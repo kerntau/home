@@ -1,14 +1,10 @@
 import {
-  ArrowDown,
   Check,
-  Github,
+  ChevronDown,
   Mail,
   Menu,
-  MonitorPlay,
-  Music2,
   Moon,
   Sun,
-  Wind,
   X,
 } from "lucide-react";
 import {
@@ -16,10 +12,19 @@ import {
   MotionConfig,
   motion,
   useReducedMotion,
-  useScroll,
 } from "motion/react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import BackgroundAtmosphere from "./components/BackgroundAtmosphere";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type PointerEvent, type ReactNode } from "react";
+import {
+  SiBilibili,
+  SiFacebook,
+  SiGithub,
+  SiGmail,
+  SiQq,
+  SiTelegram,
+  SiWechat,
+  SiX,
+} from "@icons-pack/react-simple-icons";
+import { FeishuIcon, OutlookIcon } from "./components/BrandLogos";
 import PetCompanion, { type PetReaction } from "./components/PetCompanion";
 import SignatureBackdrop from "./components/SignatureBackdrop";
 import SiteSections from "./components/SiteSections";
@@ -41,37 +46,40 @@ const BANNERS = [
 ];
 
 const heroReveal = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.62, ease: EASE } },
+  hidden: { y: 40, opacity: 0 },
+  show: { y: 0, opacity: 1, transition: { duration: 1.2, ease: [0.22, 1, 0.36, 1] } },
 };
 
 let sharedAudioContext: AudioContext | null = null;
 
 function playWindChime() {
   try {
-    const AudioContextConstructor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const AudioContextConstructor =
+      window.AudioContext ||
+      (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextConstructor) return;
-    if (!sharedAudioContext || sharedAudioContext.state === "closed") sharedAudioContext = new AudioContextConstructor();
+    if (!sharedAudioContext || sharedAudioContext.state === "closed")
+      sharedAudioContext = new AudioContextConstructor();
     if (sharedAudioContext.state === "suspended") void sharedAudioContext.resume();
 
     const context = sharedAudioContext;
     const now = context.currentTime;
-    const notes = [659.25, 783.99, 987.77];
+    const notes = [523.25, 659.25, 783.99, 987.77, 1046.5, 1318.5];
     notes.forEach((frequency, index) => {
       const oscillator = context.createOscillator();
       const gain = context.createGain();
       oscillator.type = "sine";
       oscillator.frequency.value = frequency;
       gain.gain.setValueAtTime(0, now + index * 0.07);
-      gain.gain.linearRampToValueAtTime(0.08 - index * 0.012, now + 0.035 + index * 0.07);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.15 + index * 0.18);
+      gain.gain.linearRampToValueAtTime(0.09 - index * 0.012, now + 0.035 + index * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4 + index * 0.18);
       oscillator.connect(gain);
       gain.connect(context.destination);
       oscillator.start(now + index * 0.07);
-      oscillator.stop(now + 1.35 + index * 0.18);
+      oscillator.stop(now + 1.6 + index * 0.18);
     });
   } catch {
-    // Audio is an optional ambient interaction.
+    // Audio is optional
   }
 }
 
@@ -141,22 +149,15 @@ export default function App() {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
   const [toast, setToast] = useState<"copied" | "error" | null>(null);
-  const [themePulse, setThemePulse] = useState(0);
-  const [petReaction, setPetReaction] = useState<PetReaction | null>(null);
-  const [showBanner, setShowBanner] = useState(() => sessionStorage.getItem("space-banner-dismissed-v3") !== "1");
-  const [bannerIndex, setBannerIndex] = useState(0);
-  const [bannerPaused, setBannerPaused] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [avatarLoaded, setAvatarLoaded] = useState(false);
-  const [avatarFailed, setAvatarFailed] = useState(false);
+  const [reaction, setReaction] = useState<PetReaction | null>(null);
+  const [activeQR, setActiveQR] = useState<{ title: string; src: string; color: string; desc: string; icon: ReactNode } | null>(null);
   const toastTimer = useRef<number | null>(null);
   const activeSection = useActiveSection();
   const reduceMotion = useReducedMotion() === true;
-  const { scrollYProgress } = useScroll();
 
   useLayoutEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#0B0F14" : "#F7F9FC");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "dark" ? "#07090E" : "#F8FAFC");
   }, [theme]);
 
   useEffect(() => {
@@ -170,14 +171,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!showBanner || bannerPaused) return;
-    const timer = window.setInterval(() => {
-      setBannerIndex((index) => (index + 1) % BANNERS.length);
-    }, 5200);
-    return () => window.clearInterval(timer);
-  }, [bannerPaused, showBanner]);
-
-  useEffect(() => {
     const hash = decodeURIComponent(window.location.hash.slice(1));
     if (!hash) return;
     const frame = window.requestAnimationFrame(() => document.getElementById(hash)?.scrollIntoView());
@@ -188,26 +181,11 @@ export default function App() {
     if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
   }, []);
 
-  const triggerPet = useCallback((type: PetReaction["type"]) => {
-    setPetReaction((current) => ({ id: (current?.id ?? 0) + 1, type }));
-  }, []);
-
   const toggleTheme = () => {
     const next = theme === "light" ? "dark" : "light";
     localStorage.setItem("theme", next);
     setTheme(next);
-    setThemePulse((value) => value + 1);
-    triggerPet("theme");
-  };
-
-  const handleChime = () => {
-    playWindChime();
-    triggerPet("chime");
-  };
-
-  const dismissBanner = () => {
-    sessionStorage.setItem("space-banner-dismissed-v3", "1");
-    setShowBanner(false);
+    setReaction({ id: Date.now(), type: "theme" });
   };
 
   const handleCopy = async () => {
@@ -220,7 +198,7 @@ export default function App() {
     }
 
     setToast(copied ? "copied" : "error");
-    triggerPet(copied ? "copied" : "error");
+    setReaction({ id: Date.now(), type: copied ? "copied" : "error" });
     if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setToast(null), 2600);
   };
@@ -230,208 +208,162 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <main className="site-root" aria-label="kerntau 个人主页">
+        <video className="background-video" src="/background.mp4" autoPlay loop muted playsInline />
+        {/* Global Lighter Blur Mask */}
+        <div className="fixed inset-0 z-0 bg-black/10 backdrop-blur-md pointer-events-none" />
+        
         <a className="skip-link" href="#content">跳到主要内容</a>
-        <BackgroundAtmosphere theme={theme} />
 
-        <AnimatePresence>
-          {themePulse > 0 && !reduceMotion && (
-            <motion.div
-              key={themePulse}
-              className="theme-pulse"
-              initial={{ opacity: 0.34, scale: 0 }}
-              animate={{ opacity: 0, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.62, ease: EASE }}
-              aria-hidden="true"
-            />
-          )}
-        </AnimatePresence>
-
-        <header className="topbar">
-          <div className="topbar-inner">
-            <a href="#intro" className="brand-mark" aria-label="返回顶部">
-              SPACE / 001
-            </a>
-            <nav className="topnav" aria-label="页面导航">
-              {NAV_ITEMS.map((item) => (
-                <a
-                  key={item.id}
-                  href={item.href}
-                  className={activeSection === item.id ? "is-active" : ""}
-                  aria-current={activeSection === item.id ? "location" : undefined}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-            <button
-              type="button"
-              className="icon-button menu-button"
-              onClick={() => setMenuOpen((open) => !open)}
-              aria-label={menuOpen ? "关闭导航菜单" : "打开导航菜单"}
-              aria-expanded={menuOpen}
-              aria-controls="mobile-navigation"
-            >
-              {menuOpen ? <X aria-hidden="true" /> : <Menu aria-hidden="true" />}
-            </button>
-            <button
-              type="button"
-              className="icon-button theme-button"
-              onClick={toggleTheme}
-              aria-label={`切换到${theme === "light" ? "深色" : "浅色"}主题`}
-            >
-              <ThemeIcon aria-hidden="true" />
-            </button>
-          </div>
-          <motion.div className="reading-progress" style={{ scaleX: scrollYProgress }} />
-        </header>
-
-        <AnimatePresence>
-          {menuOpen && (
-            <motion.nav
-              id="mobile-navigation"
-              className="mobile-navigation"
-              aria-label="移动端页面导航"
-              initial={reduceMotion ? false : { opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.24, ease: EASE }}
-            >
-              {NAV_ITEMS.map((item, index) => (
-                <a
-                  key={item.id}
-                  href={item.href}
-                  className={activeSection === item.id ? "is-active" : ""}
-                  aria-current={activeSection === item.id ? "location" : undefined}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  <span>0{index + 1}</span>
-                  {item.label}
-                </a>
-              ))}
-            </motion.nav>
-          )}
-        </AnimatePresence>
-
-        <section id="intro" className="hero" aria-labelledby="hero-title">
-          <AnimatePresence>
-            {showBanner && (
-              <motion.aside
-                className="notice-banner"
-                initial={reduceMotion ? false : { opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.28, ease: EASE }}
-                onPointerEnter={() => setBannerPaused(true)}
-                onPointerLeave={() => setBannerPaused(false)}
-                onFocusCapture={() => setBannerPaused(true)}
-                onBlurCapture={(event) => {
-                  if (!event.currentTarget.contains(event.relatedTarget)) setBannerPaused(false);
-                }}
-              >
-                <span className="notice-label">NOTICE</span>
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.p
-                    key={bannerIndex}
-                    initial={reduceMotion ? false : { opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }}
-                    transition={{ duration: 0.22 }}
-                  >
-                    {BANNERS[bannerIndex].prefix}
-                    <a href={BANNERS[bannerIndex].href} target="_blank" rel="noopener noreferrer">
-                      {BANNERS[bannerIndex].label}
-                    </a>
-                    {BANNERS[bannerIndex].suffix}
-                  </motion.p>
-                </AnimatePresence>
-                <button type="button" onClick={dismissBanner} aria-label="关闭站点横幅">
-                  <X aria-hidden="true" />
-                </button>
-              </motion.aside>
-            )}
-          </AnimatePresence>
+        <section 
+          id="intro" 
+          className="relative z-10 min-h-dvh flex items-center justify-center px-4 md:px-8 py-8 md:py-12"
+        >
 
           <motion.div
-            className="hero-inner"
+            className="flex flex-col items-center justify-center w-full max-w-6xl mx-auto"
             initial="hidden"
             animate="show"
-            transition={{ staggerChildren: 0.09, delayChildren: reduceMotion ? 0 : 0.16 }}
+            transition={{ staggerChildren: 0.12, delayChildren: reduceMotion ? 0 : 0.2 }}
           >
-            <div className="hero-copy">
-              <motion.div variants={heroReveal} className="hero-kicker">
-                <span className="status-dot" />
-                <span>PERSONAL SPACE / ONLINE</span>
-              </motion.div>
-              <motion.h1 variants={heroReveal} id="hero-title">kerntau</motion.h1>
-              <motion.p variants={heroReveal} className="hero-role">Security researcher &amp; frontend builder</motion.p>
-              <motion.p variants={heroReveal} className="hero-intro">
-                用代码理解系统，用文字保存过程。这里连接我的知识、作品与仍在发生的生活。
-              </motion.p>
-              <motion.div variants={heroReveal} className="contact-rail" aria-label="联系方式">
-                <button type="button" onClick={handleCopy} aria-label={`复制邮箱地址 ${EMAIL}`}>
-                  {toast === "copied" ? <Check aria-hidden="true" /> : <Mail aria-hidden="true" />}
-                  <span>{toast === "copied" ? "已复制" : "Email"}</span>
-                </button>
-                <a href="https://github.com/kerntau" target="_blank" rel="noopener noreferrer" aria-label="打开 GitHub 主页，新窗口">
-                  <Github aria-hidden="true" /><span>GitHub</span>
-                </a>
-                <a href="https://space.bilibili.com/9655855" target="_blank" rel="noopener noreferrer" aria-label="打开 Bilibili 主页，新窗口">
-                  <MonitorPlay aria-hidden="true" /><span>Bilibili</span>
-                </a>
-                <a href="https://v.douyin.com/HWMgjLaTtFk" target="_blank" rel="noopener noreferrer" aria-label="打开 Douyin 主页，新窗口">
-                  <Music2 aria-hidden="true" /><span>Douyin</span>
-                </a>
-              </motion.div>
-            </div>
-
-            <motion.div variants={heroReveal} className="hero-visual">
-              <div className="signature-avatar">
-                <div className="avatar-frame">
-                  {avatarFailed ? <span>K</span> : (
-                    <img
-                      src="/avatar.png"
-                      alt="kerntau"
-                      width="64"
-                      height="64"
-                      onLoad={() => setAvatarLoaded(true)}
-                      onError={() => setAvatarFailed(true)}
-                      className={avatarLoaded ? "is-loaded" : ""}
-                    />
-                  )}
-                </div>
-              </div>
+            <motion.div variants={heroReveal} className="w-full flex items-center justify-center z-10">
               <SignatureBackdrop />
             </motion.div>
+
+            {/* Standalone Separate Floating Contact Buttons */}
+            <motion.div 
+              variants={heroReveal} 
+              className="flex flex-wrap items-center justify-center gap-4 mt-12 z-20 max-w-2xl px-4"
+            >
+              {[
+                { id: 'github', label: 'GITHUB', icon: <SiGithub className="w-5 h-5 text-white" />, href: 'https://github.com/kerntau' },
+                { id: 'wechat', label: 'WECHAT', icon: <SiWechat className="w-5 h-5 text-[#07C160]" />, qr: { title: "微信 (WeChat)", src: "/wechat.png", color: "#07C160", desc: "扫一扫添加微信好友", icon: <SiWechat className="w-5 h-5 text-white" /> } },
+                { id: 'qq', label: 'QQ', icon: <SiQq className="w-5 h-5 text-[#1296DB]" />, qr: { title: "腾讯 QQ", src: "/feishu.png", color: "#1296DB", desc: "扫一扫添加 QQ 好友", icon: <SiQq className="w-5 h-5 text-white" /> } },
+                { id: 'feishu', label: 'FEISHU', icon: <FeishuIcon className="w-5 h-5 text-[#3370FF]" />, qr: { title: "飞书 (Feishu)", src: "/qq.jpg", color: "#3370FF", desc: "扫一扫添加飞书联系人", icon: <FeishuIcon className="w-5 h-5 text-white" /> } },
+                { id: 'bilibili', label: 'BILIBILI', icon: <SiBilibili className="w-5 h-5 text-[#FF6699]" />, href: 'https://space.bilibili.com/9655855' },
+                { id: 'twitter', label: 'TWITTER', icon: <SiX className="w-5 h-5 text-white" />, href: 'https://x.com/Kerntau' },
+                { id: 'telegram', label: 'TELEGRAM', icon: <SiTelegram className="w-5 h-5 text-[#229ED9]" />, href: 'https://t.me/Kerntau' },
+                { id: 'facebook', label: 'FACEBOOK', icon: <SiFacebook className="w-5 h-5 text-[#1877F2]" />, href: 'https://www.facebook.com/profile.php?id=61584118511046' },
+                { id: 'gmail', label: 'GMAIL', icon: <SiGmail className="w-5 h-5 text-[#EA4335]" />, href: 'mailto:kerntau@gmail.com' },
+                { id: 'outlook', label: toast === "copied" ? "COPIED" : "OUTLOOK", icon: toast === "copied" ? <Check className="w-5 h-5 text-[#0078D4]" /> : <OutlookIcon className="w-5 h-5 text-[#0078D4]" />, action: 'copy' },
+              ].map(link => {
+                const commonClasses = "group relative p-2.5 rounded-full border border-white/10 bg-black/40 hover:bg-black/80 hover:border-white/30 shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center cursor-pointer";
+                const tooltip = (
+                  <span className="absolute -top-11 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-mono font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap shadow-xl border border-white/10 tracking-wider">
+                    {link.label}
+                  </span>
+                );
+                
+                if (link.href) {
+                  return (
+                    <a key={link.id} href={link.href} target="_blank" rel="noopener noreferrer" className={commonClasses} aria-label={link.label}>
+                      {link.icon}
+                      {tooltip}
+                    </a>
+                  );
+                }
+                
+                if (link.qr) {
+                  return (
+                    <button key={link.id} type="button" onClick={() => setActiveQR(link.qr)} className={commonClasses} aria-label={link.label}>
+                      {link.icon}
+                      {tooltip}
+                    </button>
+                  );
+                }
+                
+                if (link.action === 'copy') {
+                  return (
+                    <button key={link.id} type="button" onClick={handleCopy} className={commonClasses} aria-label={link.label}>
+                      {link.icon}
+                      {tooltip}
+                    </button>
+                  );
+                }
+                
+                return null;
+              })}
+            </motion.div>
+
+            {/* Minimalist Premium QR Modal */}
+            <AnimatePresence>
+              {activeQR && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                  onClick={() => setActiveQR(null)}
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md cursor-pointer"
+                >
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                    exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                    transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                    onClick={(e) => e.stopPropagation()}
+                    className="relative w-full max-w-[330px] p-3.5 rounded-[24px] bg-slate-950/80 border border-white/12 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] backdrop-blur-3xl flex flex-col items-center cursor-default select-none overflow-hidden"
+                  >
+                    {/* Minimalist Header */}
+                    <div className="w-full flex items-center justify-between px-1.5 pt-0.5 pb-3 z-10">
+                      <div className="flex items-center gap-2.5">
+                        <div 
+                          className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm shrink-0"
+                          style={{ backgroundColor: activeQR.color }}
+                        >
+                          {activeQR.icon}
+                        </div>
+                        <h3 className="text-sm font-bold text-white/90 font-mono tracking-wider">{activeQR.title}</h3>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveQR(null)}
+                        className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                        aria-label="关闭"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* QR Code Frame */}
+                    <div className="w-full aspect-square p-2 bg-white rounded-[18px] shadow-inner flex items-center justify-center overflow-hidden z-10">
+                      <img 
+                        src={activeQR.src} 
+                        alt={activeQR.title} 
+                        className="w-full h-full object-contain rounded-xl" 
+                      />
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+
           </motion.div>
 
-          <motion.a
-            href="#about"
-            className="scroll-cue"
-            aria-label="继续浏览"
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: reduceMotion ? 0 : 2.1, duration: 0.4 }}
+          {/* Scroll Down Arrow */}
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: reduceMotion ? 0 : 0.5, duration: 1 }}
+            className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce text-white/50 hover:text-[var(--t-signal)] transition-colors cursor-pointer z-30"
+            onClick={() => document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            <span>SCROLL TO EXPLORE</span>
-            <ArrowDown aria-hidden="true" />
-          </motion.a>
+            <span className="text-[10px] font-mono tracking-widest uppercase mb-1">Scroll</span>
+            <ChevronDown className="w-5 h-5" />
+          </motion.div>
         </section>
 
-        <SiteSections />
+        <div className="relative z-10 w-full border-t border-white/10">
+          <SiteSections />
 
-        <footer className="site-footer">
-          <span className="footer-end">END / KEEP BUILDING</span>
-          <div className="footer-meta">
-            <button type="button" className="chime-control" onClick={handleChime}>
-              <Wind aria-hidden="true" /> 轻抚风铃
-            </button>
-            <span>© {YEAR} KERNTAU</span>
-            <span>运行 <Uptime /></span>
-          </div>
-        </footer>
-
-        <PetCompanion activeSection={activeSection} reaction={petReaction} />
+          <footer className="site-footer">
+            <span className="footer-end">END / KEEP BUILDING</span>
+            <div className="footer-meta">
+              <span>© {YEAR} KERNTAU</span>
+              <span>运行 <Uptime /></span>
+            </div>
+          </footer>
+        </div>
 
         <AnimatePresence>
           {toast && (
@@ -439,15 +371,17 @@ export default function App() {
               className="toast"
               role={toast === "error" ? "alert" : "status"}
               aria-live={toast === "error" ? "assertive" : "polite"}
-              initial={{ opacity: 0, y: 10, x: "-50%", scale: 0.96 }}
+              initial={{ opacity: 0, y: 16, x: "-50%", scale: 0.92 }}
               animate={{ opacity: 1, y: 0, x: "-50%", scale: 1 }}
-              exit={{ opacity: 0, y: -8, x: "-50%", scale: 0.98 }}
+              exit={{ opacity: 0, y: -10, x: "-50%", scale: 0.95 }}
               transition={{ duration: 0.22, ease: EASE }}
             >
-              {toast === "copied" ? "邮箱已复制" : `复制失败：${EMAIL}`}
+              {toast === "copied" ? "邮箱已复制到剪贴板" : `复制失败：${EMAIL}`}
             </motion.div>
           )}
         </AnimatePresence>
+        
+        <PetCompanion activeSection={activeSection} reaction={reaction} />
       </main>
     </MotionConfig>
   );

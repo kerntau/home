@@ -70,6 +70,12 @@ export const PROJECTS: Project[] = [
     repository: "https://github.com/kerntau/home",
     stack: "React · Vite · Motion",
   },
+  {
+    name: "语雀知识库 / Yuque",
+    description: "个人知识整理与长期笔记，包含沉淀的技术思考与开发经验。",
+    repository: "https://www.yuque.com/curn",
+    stack: "Knowledge Base · Yuque",
+  },
 ];
 
 export const DESTINATIONS: Destination[] = [
