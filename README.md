@@ -1,45 +1,89 @@
-# kerntau Home
+# Space (kerntau Home)
 
-kerntau 的统一个人主页。原 `homepage` 项目的介绍、文章、项目、站点与日志已合并到 Space 的设计语言和 React 架构中。
+> kerntau 的个人主页与数字空间。基于 React 19、Vite 6 与 Tailwind CSS 搭建，整合个人介绍、项目展示、站点导航与技术日志。
+
+## 核心特性
+
+- **主题与视觉**
+  - 支持明暗主题切换，自动读取 `prefers-color-scheme` 系统偏好，并通过 `localStorage` 持久化。
+  - 基于 CSS Custom Properties 与 Motion 动效系统，提供极简高质感视觉体验。
+  - 内置桌面宠物交互组件（PetCompanion）与手绘签名背景（SignatureBackdrop）。
+
+- **音频与互动体验**
+  - 基于 Web Audio API 实现五声音阶风铃音效，包含颤音调制与指数衰减合成。
+  - 点击一键复制 Email 地址，搭配 Toast 提示交互。
+
+- **实时状态与数据管理**
+  - 独立组件实时计算并显示站点运行时间（基准起点：2025-11-10）。
+  - 结构化模块管理个人项目、文章索引、推荐站点与时间线记录。
+
+- **无障碍与 SEO 优化**
+  - 深度适配 `prefers-reduced-motion` 动效减缓策略。
+  - 遵循 ARIA 规范与键盘 `focus-visible` 焦点样式。
+  - 完整配置 Open Graph (OG) 社交分享元标签与动态 `theme-color`。
 
 ## 技术栈
 
-React 19 + Vite 6 + TypeScript + Tailwind CSS v4 + Motion
-
-## 功能
-
-- 明暗主题：localStorage 持久化，首次访问读取 `prefers-color-scheme` 系统偏好
-- 欢迎横幅：可关闭，sessionStorage 记忆关闭状态
-- 统一内容：首页内整合个人介绍、文章索引、项目、站点与时间线
-- 社交链接：Email（点击复制到剪贴板）、GitHub、抖音、Bilibili
-- 风铃音效：Web Audio API 合成五声音阶，带颤音和指数衰减
-- 运行时间：从 2025-11-10 起实时计时，独立组件隔离重渲染
-- 无障碍：`prefers-reduced-motion` 支持、键盘 focus-visible 样式、ARIA 标签
-- SEO：meta description + Open Graph 标签，theme-color 随主题动态更新
-- 响应式：移动端/桌面端断点适配
+| 领域 | 技术方案 |
+| --- | --- |
+| **核心框架** | React 19 + TypeScript |
+| **构建工具** | Vite 6 |
+| **样式与 UI** | Tailwind CSS v4 + Motion |
+| **图标库** | Lucide React + @icons-pack/react-simple-icons |
+| **音频合成** | Web Audio API |
+| **部署托管** | Cloudflare Pages |
 
 ## 项目结构
 
-- `src/App.tsx`：主题、背景、宠物、通知与页面壳层
-- `src/components/`：主页内容区组件
-- `src/data/`：文章、项目、站点与时间线数据
+```text
+space/
+├── public/                 # 静态资源 (含 OG 分享图、图片素材等)
+├── src/
+│   ├── components/         # 核心 UI 组件
+│   │   ├── BackgroundAtmosphere.tsx # 背景氛围高光
+│   │   ├── BrandLogos.tsx           # 品牌与社交图标组件
+│   │   ├── PetCompanion.tsx         # 桌面互动宠物组件
+│   │   ├── SignatureBackdrop.tsx    # 动态签名背景组件
+│   │   └── SiteSections.tsx         # 内容区块 (文章/项目/站点/日志)
+│   ├── data/               # 结构化数据
+│   │   └── site.ts
+│   ├── App.tsx             # 页面主体结构与状态控制
+│   ├── main.tsx            # React 应用入口
+│   └── index.css           # 全局设计系统与样式定义
+├── index.html              # HTML 页面模板与 SEO 配置
+├── package.json
+└── vite.config.ts
+```
 
 ## 本地开发
 
-```bash
-npm install
-npm run dev
-```
+### 环境准备
 
-## 构建
+- Node.js >= 18
+- npm >= 9
 
-```bash
-npm run build
-```
+### 命令说明
 
-## 部署
+- **安装依赖**：
+  ```bash
+  npm install
+  ```
+- **启动开发服务器**（默认端口 `3000`）：
+  ```bash
+  npm run dev
+  ```
+- **类型检查**：
+  ```bash
+  npm run lint
+  ```
+- **构建生产产物**：
+  ```bash
+  npm run build
+  ```
 
-Cloudflare Pages — 构建产物 `dist/` 目录。
+## 部署说明
+
+项目支持部署至 **Cloudflare Pages** 或任何静态托管服务。构建输出目录为 `dist`。
 
 ---
 
