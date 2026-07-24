@@ -188,16 +188,16 @@ export default function App() {
     setReaction({ id: Date.now(), type: "theme" });
   };
 
-  const handleCopy = async () => {
+  const handleCopy = async (textToCopy: string = EMAIL) => {
     let copied = false;
     try {
-      await navigator.clipboard.writeText(EMAIL);
+      await navigator.clipboard.writeText(textToCopy);
       copied = true;
     } catch {
-      copied = fallbackCopy(EMAIL);
+      copied = fallbackCopy(textToCopy);
     }
 
-    setToast(copied ? "copied" : "error");
+    setToast(copied ? (textToCopy as any) : "error");
     setReaction({ id: Date.now(), type: copied ? "copied" : "error" });
     if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
     toastTimer.current = window.setTimeout(() => setToast(null), 2600);
@@ -235,18 +235,18 @@ export default function App() {
               className="flex flex-wrap items-center justify-center gap-4 mt-12 z-20 max-w-2xl px-4"
             >
               {[
-                { id: 'github', label: 'GITHUB', icon: <SiGithub className="w-5 h-5 text-white" />, href: 'https://github.com/kerntau' },
-                { id: 'wechat', label: 'WECHAT', icon: <SiWechat className="w-5 h-5 text-[#07C160]" />, qr: { title: "微信 (WeChat)", src: "/wechat.png", color: "#07C160", desc: "扫一扫添加微信好友", icon: <SiWechat className="w-5 h-5 text-white" /> } },
-                { id: 'qq', label: 'QQ', icon: <SiQq className="w-5 h-5 text-[#1296DB]" />, qr: { title: "腾讯 QQ", src: "/feishu.png", color: "#1296DB", desc: "扫一扫添加 QQ 好友", icon: <SiQq className="w-5 h-5 text-white" /> } },
-                { id: 'feishu', label: 'FEISHU', icon: <FeishuIcon className="w-5 h-5 text-[#3370FF]" />, qr: { title: "飞书 (Feishu)", src: "/qq.jpg", color: "#3370FF", desc: "扫一扫添加飞书联系人", icon: <FeishuIcon className="w-5 h-5 text-white" /> } },
-                { id: 'bilibili', label: 'BILIBILI', icon: <SiBilibili className="w-5 h-5 text-[#FF6699]" />, href: 'https://space.bilibili.com/9655855' },
-                { id: 'twitter', label: 'TWITTER', icon: <SiX className="w-5 h-5 text-white" />, href: 'https://x.com/Kerntau' },
-                { id: 'telegram', label: 'TELEGRAM', icon: <SiTelegram className="w-5 h-5 text-[#229ED9]" />, href: 'https://t.me/Kerntau' },
-                { id: 'facebook', label: 'FACEBOOK', icon: <SiFacebook className="w-5 h-5 text-[#1877F2]" />, href: 'https://www.facebook.com/profile.php?id=61584118511046' },
-                { id: 'gmail', label: 'GMAIL', icon: <SiGmail className="w-5 h-5 text-[#EA4335]" />, href: 'mailto:kerntau@gmail.com' },
-                { id: 'outlook', label: toast === "copied" ? "COPIED" : "OUTLOOK", icon: toast === "copied" ? <Check className="w-5 h-5 text-[#0078D4]" /> : <OutlookIcon className="w-5 h-5 text-[#0078D4]" />, action: 'copy' },
+                { id: 'github', label: 'GITHUB', icon: <SiGithub className="w-5 h-5 text-white" />, href: 'https://github.com/kerntau', hoverStyle: "hover:border-white/40 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(255,255,255,0.25)]" },
+                { id: 'wechat', label: 'WECHAT', icon: <SiWechat className="w-5 h-5 text-[#07C160]" />, qr: { title: "微信 (WeChat)", src: "/wechat.png", color: "#07C160", desc: "扫一扫添加微信好友", icon: <SiWechat className="w-5 h-5 text-white" /> }, hoverStyle: "hover:border-[#07C160]/60 hover:bg-[#07C160]/10 hover:shadow-[0_0_20px_rgba(7,193,96,0.3)]" },
+                { id: 'qq', label: 'QQ', icon: <SiQq className="w-5 h-5 text-[#1296DB]" />, qr: { title: "腾讯 QQ", src: "/feishu.png", color: "#1296DB", desc: "扫一扫添加 QQ 好友", icon: <SiQq className="w-5 h-5 text-white" /> }, hoverStyle: "hover:border-[#1296DB]/60 hover:bg-[#1296DB]/10 hover:shadow-[0_0_20px_rgba(18,150,219,0.3)]" },
+                { id: 'feishu', label: 'FEISHU', icon: <FeishuIcon className="w-5 h-5 text-[#3370FF]" />, qr: { title: "飞书 (Feishu)", src: "/qq.jpg", color: "#3370FF", desc: "扫一扫添加飞书联系人", icon: <FeishuIcon className="w-5 h-5 text-white" /> }, hoverStyle: "hover:border-[#3370FF]/60 hover:bg-[#3370FF]/10 hover:shadow-[0_0_20px_rgba(51,112,255,0.3)]" },
+                { id: 'bilibili', label: 'BILIBILI', icon: <SiBilibili className="w-5 h-5 text-[#FF6699]" />, href: 'https://space.bilibili.com/9655855', hoverStyle: "hover:border-[#FF6699]/60 hover:bg-[#FF6699]/10 hover:shadow-[0_0_20px_rgba(255,102,153,0.3)]" },
+                { id: 'twitter', label: 'TWITTER', icon: <SiX className="w-5 h-5 text-white" />, href: 'https://x.com/Kerntau', hoverStyle: "hover:border-white/40 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(255,255,255,0.25)]" },
+                { id: 'telegram', label: 'TELEGRAM', icon: <SiTelegram className="w-5 h-5 text-[#229ED9]" />, href: 'https://t.me/Kerntau', hoverStyle: "hover:border-[#229ED9]/60 hover:bg-[#229ED9]/10 hover:shadow-[0_0_20px_rgba(34,158,217,0.3)]" },
+                { id: 'facebook', label: 'FACEBOOK', icon: <SiFacebook className="w-5 h-5 text-[#1877F2]" />, href: 'https://www.facebook.com/profile.php?id=61584118511046', hoverStyle: "hover:border-[#1877F2]/60 hover:bg-[#1877F2]/10 hover:shadow-[0_0_20px_rgba(24,119,242,0.3)]" },
+                { id: 'gmail', label: toast === "kerntau@gmail.com" ? "COPIED" : "GMAIL", icon: toast === "kerntau@gmail.com" ? <Check className="w-5 h-5 text-[#EA4335]" /> : <SiGmail className="w-5 h-5 text-[#EA4335]" />, action: 'copy', email: 'kerntau@gmail.com', hoverStyle: "hover:border-[#EA4335]/60 hover:bg-[#EA4335]/10 hover:shadow-[0_0_20px_rgba(234,67,53,0.3)]" },
+                { id: 'outlook', label: toast === "kerntau@outlook.com" ? "COPIED" : "OUTLOOK", icon: toast === "kerntau@outlook.com" ? <Check className="w-5 h-5 text-[#0078D4]" /> : <OutlookIcon className="w-5 h-5 text-[#0078D4]" />, action: 'copy', email: 'kerntau@outlook.com', hoverStyle: "hover:border-[#0078D4]/60 hover:bg-[#0078D4]/10 hover:shadow-[0_0_20px_rgba(0,120,212,0.3)]" },
               ].map(link => {
-                const commonClasses = "group relative p-2.5 rounded-full border border-white/10 bg-black/40 hover:bg-black/80 hover:border-white/30 shadow-lg backdrop-blur-md transition-all duration-200 hover:scale-110 active:scale-95 flex items-center justify-center cursor-pointer";
+                const commonClasses = `group relative p-3 rounded-full bg-slate-950/40 border border-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.12),0_8px_20px_-4px_rgba(0,0,0,0.5)] backdrop-blur-md transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center cursor-pointer ${link.hoverStyle}`;
                 const tooltip = (
                   <span className="absolute -top-11 left-1/2 -translate-x-1/2 px-2.5 py-1 bg-slate-900 text-white text-[10px] font-mono font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap shadow-xl border border-white/10 tracking-wider">
                     {link.label}
@@ -273,7 +273,7 @@ export default function App() {
                 
                 if (link.action === 'copy') {
                   return (
-                    <button key={link.id} type="button" onClick={handleCopy} className={commonClasses} aria-label={link.label}>
+                    <button key={link.id} type="button" onClick={() => handleCopy(link.email)} className={commonClasses} aria-label={link.label}>
                       {link.icon}
                       {tooltip}
                     </button>
@@ -296,40 +296,40 @@ export default function App() {
                   className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md cursor-pointer"
                 >
                   <motion.div
-                    initial={{ scale: 0.95, opacity: 0, y: 10 }}
+                    initial={{ scale: 0.94, opacity: 0, y: 12 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
-                    exit={{ scale: 0.95, opacity: 0, y: 10 }}
-                    transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                    exit={{ scale: 0.94, opacity: 0, y: 12 }}
+                    transition={{ type: "spring", stiffness: 420, damping: 28 }}
                     onClick={(e) => e.stopPropagation()}
-                    className="relative w-full max-w-[330px] p-3.5 rounded-[24px] bg-slate-950/80 border border-white/12 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] backdrop-blur-3xl flex flex-col items-center cursor-default select-none overflow-hidden"
+                    className="relative w-full max-w-[320px] p-4 rounded-3xl bg-white/95 backdrop-blur-2xl shadow-[0_30px_70px_-15px_rgba(0,0,0,0.6)] border border-white/40 flex flex-col items-center cursor-default select-none overflow-hidden"
                   >
-                    {/* Minimalist Header */}
-                    <div className="w-full flex items-center justify-between px-1.5 pt-0.5 pb-3 z-10">
+                    {/* Seamless Header */}
+                    <div className="w-full flex items-center justify-between pb-3 px-1">
                       <div className="flex items-center gap-2.5">
                         <div 
-                          className="w-7 h-7 rounded-lg flex items-center justify-center shadow-sm shrink-0"
+                          className="w-7 h-7 rounded-xl flex items-center justify-center shadow-sm shrink-0"
                           style={{ backgroundColor: activeQR.color }}
                         >
                           {activeQR.icon}
                         </div>
-                        <h3 className="text-sm font-bold text-white/90 font-mono tracking-wider">{activeQR.title}</h3>
+                        <h3 className="text-sm font-bold text-slate-800 tracking-wider font-mono">{activeQR.title}</h3>
                       </div>
                       <button
                         type="button"
                         onClick={() => setActiveQR(null)}
-                        className="p-1.5 rounded-full bg-white/5 hover:bg-white/15 text-slate-400 hover:text-white transition-colors cursor-pointer shrink-0"
+                        className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer shrink-0"
                         aria-label="关闭"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
 
-                    {/* QR Code Frame */}
-                    <div className="w-full aspect-square p-2 bg-white rounded-[18px] shadow-inner flex items-center justify-center overflow-hidden z-10">
+                    {/* Seamless QR Image Card */}
+                    <div className="w-full rounded-2xl overflow-hidden border border-slate-100 shadow-sm">
                       <img 
                         src={activeQR.src} 
                         alt={activeQR.title} 
-                        className="w-full h-full object-contain rounded-xl" 
+                        className="w-full h-auto object-cover rounded-2xl" 
                       />
                     </div>
                   </motion.div>
@@ -376,7 +376,7 @@ export default function App() {
               exit={{ opacity: 0, y: -10, x: "-50%", scale: 0.95 }}
               transition={{ duration: 0.22, ease: EASE }}
             >
-              {toast === "copied" ? "邮箱已复制到剪贴板" : `复制失败：${EMAIL}`}
+              {toast === "error" ? "复制失败" : `${toast} 已复制到剪贴板`}
             </motion.div>
           )}
         </AnimatePresence>
