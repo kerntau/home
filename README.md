@@ -74,16 +74,7 @@ npm run preview
 
 将 dist/ 发布到 Cloudflare Pages 或其他静态托管服务。上线前检查明暗主题、键盘焦点、减少动效、音频权限和移动端布局；仓库没有固定线上地址。
 
-## 07. 工程契约 // ENGINEERING CONTRACT
 
-个人资料和站点链接集中在 src/data/site.ts 中维护。不要把私密联系方式、访问令牌或未公开内容提交到 public/；新增动效需保留 prefers-reduced-motion 降级。
-
-## 08. 路线图 // ROADMAP
-
-- [x] 主题、动效、互动宠物和结构化站点内容
-- [x] SEO metadata 与静态构建
-- [ ] 持续优化移动端性能和键盘可访问性
-- [ ] 增加构建期链接与内容校验
 
 ## 09. 许可证 // LICENSE
 
